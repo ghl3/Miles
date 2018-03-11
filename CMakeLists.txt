@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.9)
 project (Miles)
 
-set(CMAKE_CXX_FLAGS "-g -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -std=c++11")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 get_filename_component(DEPS_ROOT "${PROJECT_BINARY_DIR}/deps" ABSOLUTE)
 
@@ -11,20 +11,48 @@ include(ExtProjectUtils)
 # This also will create "googletest.git" target, which we'll use as dependency for our test project
 ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
 
-
-include_directories("include")
-file(GLOB SOURCES "src/*.cxx")
-add_executable(miles ${SOURCES})
-
-
-include_directories("${DEPS_ROOT}/include")
-link_directories("${DEPS_ROOT}/lib")
-link_directories("${DEPS_ROOT}/lib64")
-
 #-------------------
 # set common include folder for module
 #-------------------
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
+
+find_package(Tcmalloc)
+find_package(Threads)
+find_package(OpenSSL)
+
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options system REQUIRED )
+
+if(OPENSSL_FOUND)
+  include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  message("Found ccache ${CCACHE_FOUND}")
+  message("Using ccache to speed up compilation")
+  set(ENV{CCACHE_CPP2} "yes")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
+include_directories("include")
+file(GLOB SOURCES "src/*.cxx")
+
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+#link_directories(${Boost_LIBRARY_DIR})
+
+include_directories("${DEPS_ROOT}/include")
+link_directories("${DEPS_ROOT}/lib")
+#link_directories("${DEPS_ROOT}/lib64")
+
+include_directories( ${Boost_INCLUDE_DIR} )
+
+add_executable(miles src/miles.cxx)
+TARGET_LINK_LIBRARIES( miles LINK_PUBLIC ${Boost_LIBRARIES} )
+
+add_executable(server src/server.cxx)
+TARGET_LINK_LIBRARIES( server LINK_PUBLIC ${Boost_LIBRARIES}  ${Boost_SYSTEM_LIBRARY} )
+
 
 #-------------------
 # Test
