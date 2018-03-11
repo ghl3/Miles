@@ -10,3 +10,7 @@ Testing/
 deps/
 googletest.git-prefix/
 sorter_test
+
+
+.idea
+*.cbp

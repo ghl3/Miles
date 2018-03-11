@@ -6,13 +6,16 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 get_filename_component(DEPS_ROOT "${PROJECT_BINARY_DIR}/deps" ABSOLUTE)
 
 include(ExtProjectUtils)
-include_directories(include)
-file(GLOB SOURCES "src/*.cxx")
-add_executable(miles ${SOURCES})
 
 # Will download external CMakeable project from git repo, branch "master" and install it in $DEPS_ROOT
 # This also will create "googletest.git" target, which we'll use as dependency for our test project
 ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
+
+
+include_directories("include")
+file(GLOB SOURCES "src/*.cxx")
+add_executable(miles ${SOURCES})
+
 
 include_directories("${DEPS_ROOT}/include")
 link_directories("${DEPS_ROOT}/lib")

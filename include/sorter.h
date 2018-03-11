@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #if !defined(SORTER_H_)
 #define SORTER_H_
 
