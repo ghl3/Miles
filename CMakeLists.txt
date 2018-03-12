@@ -50,7 +50,7 @@ include_directories( ${Boost_INCLUDE_DIR} )
 add_executable(miles src/miles.cxx)
 TARGET_LINK_LIBRARIES( miles LINK_PUBLIC ${Boost_LIBRARIES} )
 
-add_executable(server src/server.cxx)
+add_executable(server src/server.cxx include/storage.h)
 TARGET_LINK_LIBRARIES( server LINK_PUBLIC ${Boost_LIBRARIES}  ${Boost_SYSTEM_LIBRARY} )
 
 
@@ -65,7 +65,7 @@ file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cxx)
 # from list of files we'll create tests test_name.cpp -> test_name
 foreach(_test_file ${TEST_SRC_FILES})
     get_filename_component(_test_name ${_test_file} NAME_WE)
-    add_executable(${_test_name} ${_test_file})
+    add_executable(${_test_name} ${_test_file} include/storage.h)
     add_dependencies(${_test_name} "googletest.git")
     target_link_libraries(${_test_name} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
     add_test(${_test_name} ${_test_name})
