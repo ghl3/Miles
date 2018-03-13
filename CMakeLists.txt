@@ -66,9 +66,10 @@ include_directories(${COMMON_INCLUDES})
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(miles_tests test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES})
-add_dependencies(miles_tests "googletest.git")
-target_link_libraries(miles_tests gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES})
+add_dependencies(test "googletest.git")
+target_link_libraries(test gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+
 
 # from list of files we'll create tests test_name.cpp -> test_name
 # foreach(_test_file ${TEST_SRC_FILES})
