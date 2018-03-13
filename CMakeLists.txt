@@ -62,14 +62,18 @@ TARGET_LINK_LIBRARIES( server LINK_PUBLIC ${Boost_LIBRARIES}  ${Boost_SYSTEM_LIB
 enable_testing()
 include_directories(${COMMON_INCLUDES})
 
-file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cxx)
+file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
+
+add_executable(miles_tests test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES})
+add_dependencies(miles_tests "googletest.git")
+target_link_libraries(miles_tests gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 
 # from list of files we'll create tests test_name.cpp -> test_name
-foreach(_test_file ${TEST_SRC_FILES})
-    get_filename_component(_test_name ${_test_file} NAME_WE)
-    add_executable(${_test_name} ${_test_file} include/storage.h)
-    add_dependencies(${_test_name} "googletest.git")
-    target_link_libraries(${_test_name} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
-    add_test(${_test_name} ${_test_name})
-    set_tests_properties(${_test_name} PROPERTIES TIMEOUT 5)
-endforeach()
+# foreach(_test_file ${TEST_SRC_FILES})
+#     get_filename_component(_test_name ${_test_file} NAME_WE)
+#     add_executable(${_test_name} ${_test_file} include/storage.h)
+#     add_dependencies(${_test_name} "googletest.git")
+#     target_link_libraries(${_test_name} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+#     add_test(${_test_name} ${_test_name})
+#     set_tests_properties(${_test_name} PROPERTIES TIMEOUT 5)
+# endforeach()
