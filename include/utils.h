@@ -36,7 +36,7 @@ class TempDirectory {
 public:
 
     explicit TempDirectory(const std::string &prefix): path((std::stringstream() << prefix << generateRandomId(12)).str()) {
-        boost::filesystem::create_directories(path.c_str()); //  boost::filesystem::path(path.c_str()).parent_path().string().c_str());
+        boost::filesystem::create_directories(path.c_str());
     }
 
     ~TempDirectory() {

@@ -18,7 +18,7 @@ ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} C
 #-------------------
 # set common include folder for module
 #-------------------
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include include/utils.h)
+set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include include/utils.h src/storage.cxx)
 
 find_package(Tcmalloc)
 find_package(Threads)
@@ -51,10 +51,10 @@ link_directories("${DEPS_ROOT}/lib")
 
 include_directories( ${Boost_INCLUDE_DIR} )
 
-add_executable(miles src/miles.cxx)
+add_executable(miles src/miles.cxx src/storage.cxx)
 TARGET_LINK_LIBRARIES(miles LINK_PUBLIC ${Boost_LIBRARIES} )
 
-add_executable(server src/server.cxx include/storage.h)
+add_executable(server src/server.cxx include/storage.h src/storage.cxx)
 TARGET_LINK_LIBRARIES(server LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
 
 
@@ -66,7 +66,7 @@ include_directories(${COMMON_INCLUDES})
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(test test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES})
+add_executable(test test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES} src/storage.cxx)
 add_dependencies(test "googletest.git")
 target_link_libraries(test gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 

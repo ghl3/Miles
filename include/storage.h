@@ -15,6 +15,7 @@
 
 using json = nlohmann::json;
 
+
 class StoreResult {
 
 public:
@@ -66,41 +67,9 @@ public:
 
     explicit DiskStorage(std::string directory): directory(std::move(directory)) {;}
 
-    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override {
-        if (this->tableMap->find(table) == this->tableMap->end()) {
-            (*this->tableMap)[table] = std::fstream((std::stringstream() << directory << "/" << table << ".dat").str(),
-                                                    std::fstream::in | std::fstream::out | std::fstream::trunc);
-        }
+    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
 
-        (*this->tableMap)[table] << key << std::endl;
-        (*this->tableMap)[table] << payload->dump() << std::endl;
-
-        return StoreResult(true);
-    }
-
-    FetchResult fetch(std::string table, std::string key) override {
-
-        if(this->tableMap->find(table) == this->tableMap->end()) {
-            return FetchResult(false);
-        }
-
-        std::fstream& f = (*this->tableMap)[table];
-
-        f.seekg(0);
-        std::string lineKey;
-        std::string linePayload;
-        while (std::getline(f, lineKey)) {
-
-            std::getline(f, linePayload);
-
-            if (lineKey == key) {
-                return FetchResult(true, std::make_shared<json>(json::parse(linePayload))); // keyMap[key]);
-            }
-        }
-
-        return FetchResult(false);
-    }
-
+    FetchResult fetch(std::string table, std::string key) override;
 
 private:
 
@@ -111,39 +80,13 @@ private:
 };
 
 
-
 class MapStorage: public IStorage {
 
 public:
 
-    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override {
+    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
 
-        if(data->find(table) == data->end()) {
-            data->insert({table, std::unordered_map<std::string, std::shared_ptr<json>>()});
-        }
-
-        // The underlying storage takes ownership of the JSON
-        (*data)[table][key] = std::move(payload);
-
-        return StoreResult(true);
-    }
-
-    FetchResult fetch(std::string table, std::string key) override {
-
-        if(data->find(table) == data->end()) {
-            return FetchResult(false);
-        } else {
-
-            auto keyMap = (*data)[table];
-
-            if(keyMap.find(key) == keyMap.end()) {
-                return FetchResult(false);
-            } else {
-                return FetchResult(true, keyMap[key]);
-            }
-        }
-    }
-
+    FetchResult fetch(std::string table, std::string key) override;
 
 private:
 
