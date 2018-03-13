@@ -10,7 +10,7 @@
 using json = nlohmann::json;
 
 
-std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage> &storage) {
+std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage>& storage) {
 
     auto app = std::make_unique<crow::SimpleApp>();
 
@@ -24,8 +24,8 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage> &s
 
                  try {
 
-                     auto payload = json::parse(req.body);
-                     std::cout << payload << std::endl;
+                     auto payload = std::make_unique<json>(json::parse(req.body));
+                     std::cout << *payload << std::endl;
                      auto storageResult = storage->store(table, key, std::move(payload));
                      std::cout << "Did we store successfully: " << storageResult.result << std::endl;
                      return crow::response(200, "Successfully stored key");
@@ -34,6 +34,19 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage> &s
                      return crow::response(404, "Unable to parse JSON");
                  }
              });
+
+    app->route_dynamic("/fetch/<str>/<str>")
+            ([=](const std::string table, const std::string key) {
+
+                auto fetchResult = storage->fetch(table, key);
+                std::cout << "Did we fetch successfully: " << fetchResult.result << std::endl;
+
+                if (fetchResult.result) {
+                    return crow::response(200, fetchResult.getJson().dump());
+                } else {
+                    return crow::response(404);
+                }
+            });
 
     app->route_dynamic("/hello/<int>")
             ([](

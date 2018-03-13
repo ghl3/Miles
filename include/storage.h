@@ -4,6 +4,7 @@
 
 #include <string>
 #include <utility>
+#include <unordered_map>
 
 #include "json.h"
 
@@ -29,9 +30,14 @@ class FetchResult {
 public:
 
     explicit FetchResult(bool r) : result(r), payload(nullptr) {;}
-    explicit FetchResult(bool r, std::shared_ptr<const json> j) : result(r), payload(std::move(j)) {;}
+    explicit FetchResult(bool r, std::shared_ptr<json> j) : result(r), payload(j) {;}
 
     const bool result;
+
+    const json& getJson() {
+        return *payload;
+    }
+
 
 private:
 
@@ -46,7 +52,7 @@ public:
 
     IStorage() = default;
     virtual ~IStorage() = default;
-    virtual StoreResult store(std::string, std::string, json)=0;
+    virtual StoreResult store(std::string, std::string, std::unique_ptr<json>)=0;
     virtual FetchResult fetch(std::string, std::string)=0;
 };
 
@@ -57,11 +63,39 @@ class MapStorage: public IStorage {
 
 public:
 
-    StoreResult store(std::string, std::string, json) override {
+    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override {
+
+        if(data->find(table) == data->end()) {
+            data->insert({table, std::unordered_map<std::string, std::shared_ptr<json>>()});
+        }
+
+        //std::shared_ptr<json> s_ptr{std::move(payload)};
+
+        // The underlying storage takes ownership of the JSON
+        (*data)[table][key] = std::move(payload); //s_ptr;
+
         return StoreResult(true);
     }
 
-    FetchResult fetch(std::string, std::string) override {
-        return FetchResult(false);
+    FetchResult fetch(std::string table, std::string key) override {
+
+        if(data->find(table) == data->end()) {
+            return FetchResult(false);
+        } else {
+
+            auto keyMap = (*data)[table];
+
+            if(keyMap.find(key) == keyMap.end()) {
+                return FetchResult(false);
+            } else {
+                return FetchResult(true, keyMap[key]);
+            }
+        }
     }
+
+
+private:
+
+    std::unique_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>> data = std::make_unique<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>>();
+
 };
