@@ -18,13 +18,13 @@ ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} C
 #-------------------
 # set common include folder for module
 #-------------------
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
+set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include include/utils.h)
 
 find_package(Tcmalloc)
 find_package(Threads)
 find_package(OpenSSL)
 
-FIND_PACKAGE( Boost 1.40 COMPONENTS program_options system REQUIRED )
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options system filesystem REQUIRED )
 
 if(OPENSSL_FOUND)
   include_directories(${OPENSSL_INCLUDE_DIR})
@@ -52,10 +52,10 @@ link_directories("${DEPS_ROOT}/lib")
 include_directories( ${Boost_INCLUDE_DIR} )
 
 add_executable(miles src/miles.cxx)
-TARGET_LINK_LIBRARIES( miles LINK_PUBLIC ${Boost_LIBRARIES} )
+TARGET_LINK_LIBRARIES(miles LINK_PUBLIC ${Boost_LIBRARIES} )
 
 add_executable(server src/server.cxx include/storage.h)
-TARGET_LINK_LIBRARIES( server LINK_PUBLIC ${Boost_LIBRARIES}  ${Boost_SYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES(server LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
 
 
 #-------------------
@@ -68,7 +68,7 @@ file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
 add_executable(test test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES})
 add_dependencies(test "googletest.git")
-target_link_libraries(test gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 
 # from list of files we'll create tests test_name.cpp -> test_name
