@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <utility>
 
 #include "json.h"
 
@@ -28,7 +29,7 @@ class FetchResult {
 public:
 
     explicit FetchResult(bool r) : result(r), payload(nullptr) {;}
-    explicit FetchResult(bool r, const json& j) : result(r), payload(j) {;}
+    explicit FetchResult(bool r, std::shared_ptr<const json> j) : result(r), payload(std::move(j)) {;}
 
     const bool result;
 
@@ -45,6 +46,22 @@ public:
 
     IStorage() = default;
     virtual ~IStorage() = default;
-    virtual StoreResult store(std::string, std::string, std::unique_ptr<const json>)=0;
+    virtual StoreResult store(std::string, std::string, json)=0;
     virtual FetchResult fetch(std::string, std::string)=0;
+};
+
+
+
+
+class MapStorage: public IStorage {
+
+public:
+
+    StoreResult store(std::string, std::string, json) override {
+        return StoreResult(true);
+    }
+
+    FetchResult fetch(std::string, std::string) override {
+        return FetchResult(false);
+    }
 };
