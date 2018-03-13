@@ -10,9 +10,7 @@
 using json = nlohmann::json;
 
 
-std::unique_ptr<crow::SimpleApp> createServer(std::unique_ptr<IStorage> storage) {
-
-    std::shared_ptr<IStorage> sharedStorage{std::move(storage)};
+std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage> &storage) {
 
     auto app = std::make_unique<crow::SimpleApp>();
 
@@ -26,29 +24,16 @@ std::unique_ptr<crow::SimpleApp> createServer(std::unique_ptr<IStorage> storage)
 
                  try {
 
-                     // Is this a copy or a move?
-                     //std::unique_ptr<const json> payload = std::make_unique<const json>(json::parse(req.body));
-
                      auto payload = json::parse(req.body);
-
                      std::cout << payload << std::endl;
-
-                     auto storageResult = sharedStorage->store(table, key, std::move(payload));
-
+                     auto storageResult = storage->store(table, key, std::move(payload));
                      std::cout << "Did we store successfully: " << storageResult.result << std::endl;
-
                      return crow::response(200, "Successfully stored key");
-
 
                  } catch (const json::parse_error &e) {
                      return crow::response(404, "Unable to parse JSON");
                  }
-
-             }
-
-            );
-
-
+             });
 
     app->route_dynamic("/hello/<int>")
             ([](
@@ -59,13 +44,7 @@ std::unique_ptr<crow::SimpleApp> createServer(std::unique_ptr<IStorage> storage)
                 } else {
                     std::ostringstream os;
                     os << count << " bottles of beer!";
-                    return
-                            crow::response(os
-                                                   .
-
-                                                           str()
-
-                            );
+                    return crow::response(os.str());
                 }
             });
 
@@ -79,13 +58,8 @@ std::unique_ptr<crow::SimpleApp> createServer(std::unique_ptr<IStorage> storage)
                 } else {
                     int64_t sum = x["a"].i() + x["b"].i();
                     std::ostringstream os;
-                    os <<
-                       sum;
-                    return crow::response{ os.
-
-                            str()
-
-                    };
+                    os << sum;
+                    return crow::response(os.str());
                 }
             });
 
