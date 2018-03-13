@@ -36,7 +36,6 @@ public:
         return *payload;
     }
 
-
 private:
 
     const std::shared_ptr<const json> payload;
