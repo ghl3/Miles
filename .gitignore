@@ -1,7 +1,6 @@
 
 CMakeCache.txt
 CMakeFiles
-Miles
 cmake_install.cmake
 
 CTestTestfile.cmake
@@ -9,9 +8,5 @@ Makefile
 Testing/
 deps/
 googletest.git-prefix/
-sorter_test
-
-
 .idea
 *.cbp
-server
