@@ -11,8 +11,6 @@
 #ifndef MILES_STORAGE_H
 #define MILES_STORAGE_H
 
-#endif //MILES_STORAGE_H
-
 using json = nlohmann::json;
 
 class StoreResult {
@@ -30,7 +28,7 @@ class FetchResult {
 public:
 
     explicit FetchResult(bool r) : result(r), payload(nullptr) {;}
-    explicit FetchResult(bool r, std::shared_ptr<json> j) : result(r), payload(j) {;}
+    explicit FetchResult(bool r, const std::shared_ptr<json> &j) : result(r), payload(j) {;}
 
     const bool result;
 
@@ -57,8 +55,6 @@ public:
 };
 
 
-
-
 class MapStorage: public IStorage {
 
 public:
@@ -69,10 +65,8 @@ public:
             data->insert({table, std::unordered_map<std::string, std::shared_ptr<json>>()});
         }
 
-        //std::shared_ptr<json> s_ptr{std::move(payload)};
-
         // The underlying storage takes ownership of the JSON
-        (*data)[table][key] = std::move(payload); //s_ptr;
+        (*data)[table][key] = std::move(payload);
 
         return StoreResult(true);
     }
@@ -99,3 +93,6 @@ private:
     std::unique_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>> data = std::make_unique<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>>();
 
 };
+
+
+#endif //MILES_STORAGE_H
