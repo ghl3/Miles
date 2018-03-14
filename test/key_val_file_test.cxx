@@ -25,9 +25,9 @@ TEST(storage_test, key_val_file_test)
 
     TempDirectory tmpDir("/tmp/miles/key_val_file_test_");
 
-    auto fileName = std::stringstream() << tmpDir.getPath() << "/" << "keyVal.dat";
+    auto fileName = (std::stringstream() << tmpDir.getPath() << "/" << "keyVal.dat").str();
 
-    auto storage = std::make_unique<KeyValFile>(fileName.str());
+    auto storage = std::make_unique<KeyValFile>(fileName);
     EXPECT_EQ(false, storage->fetch("foo").success);
 
     auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));

@@ -6,8 +6,11 @@
 #define MILES_KEYVALFILE_H
 
 #include <string>
+#include <iostream>
+
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 #include "json.h"
 #include "results.h"
@@ -21,7 +24,10 @@ public:
 
     explicit KeyValFile(std::string fileName):
             fileName(std::move(fileName)),
-            file(this->fileName, std::fstream::in | std::fstream::out | std::fstream::trunc) {;}
+            file(this->fileName, std::fstream::in | std::fstream::out | std::fstream::trunc) {};
+
+    KeyValFile(KeyValFile const &) = delete;
+    void operator=(KeyValFile const &x) = delete;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
 

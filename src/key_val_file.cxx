@@ -4,18 +4,19 @@
 
 #include "key_val_file.h"
 
-
 StoreResult KeyValFile::store(std::string key, std::unique_ptr<json> payload) {
-
+    this->file.seekp(std::fstream::end);
+    this->file.clear();
     this->file << key << std::endl;
     this->file << payload->dump() << std::endl;
-
-    return StoreResult(true);}
+    return StoreResult(true);
+}
 
 
 FetchResult KeyValFile::fetch(std::string key) {
 
     this->file.seekg(0);
+    this->file.clear();
     std::string lineKey;
     std::string linePayload;
     while (std::getline(this->file, lineKey)) {
@@ -27,4 +28,5 @@ FetchResult KeyValFile::fetch(std::string key) {
         }
     }
 
-    return FetchResult(false);}
+    return FetchResult(false);
+}
