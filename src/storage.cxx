@@ -5,8 +5,10 @@
 #include "storage.h"
 
 
-
 StoreResult DiskStorage::store(std::string table, std::string key, std::unique_ptr<json> payload) {
+
+    //std::lock_guard<std::mutex> guard(this->diskMutex);
+
     if (this->tableMap->find(table) == this->tableMap->end()) {
         (*this->tableMap)[table] = std::fstream((std::stringstream() << directory << "/" << table << ".dat").str(),
                                                 std::fstream::in | std::fstream::out | std::fstream::trunc);
@@ -17,7 +19,6 @@ StoreResult DiskStorage::store(std::string table, std::string key, std::unique_p
 
     return StoreResult(true);
 }
-
 
 FetchResult DiskStorage::fetch(std::string table, std::string key) {
 
@@ -42,18 +43,18 @@ FetchResult DiskStorage::fetch(std::string table, std::string key) {
     return FetchResult(false);
 }
 
+
 StoreResult MapStorage::store(std::string table, std::string key, std::unique_ptr<json> payload) {
 
     if(data->find(table) == data->end()) {
         data->insert({table, std::unordered_map<std::string, std::shared_ptr<json>>()});
     }
 
-// The underlying storage takes ownership of the JSON
+    // The underlying storage takes ownership of the JSON
     (*data)[table][key] = std::move(payload);
 
     return StoreResult(true);
 }
-
 
 FetchResult MapStorage::fetch(std::string table, std::string key) {
 
@@ -70,3 +71,21 @@ FetchResult MapStorage::fetch(std::string table, std::string key) {
         }
     }
 }
+
+
+
+StoreResult HybridStorage::store(std::string table, std::string key, std::unique_ptr<json> payload) {
+
+    std::lock_guard<std::mutex> guard(this->lock);
+
+    return this->inMemoryStorage->store(table, key, std::move(payload));
+}
+
+
+FetchResult HybridStorage::fetch(std::string table, std::string key) {
+
+    std::lock_guard<std::mutex> guard(this->lock);
+
+    return this->inMemoryStorage->fetch(table, key);
+}
+

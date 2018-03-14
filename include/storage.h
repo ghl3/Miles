@@ -8,42 +8,14 @@
 #include <sstream>
 #include <unordered_map>
 
+
+#include "results.h"
 #include "json.h"
 
 #ifndef MILES_STORAGE_H
 #define MILES_STORAGE_H
 
 using json = nlohmann::json;
-
-
-class StoreResult {
-
-public:
-
-    explicit StoreResult(bool r) : result(r) {;}
-    const bool result;
-
-};
-
-
-class FetchResult {
-
-public:
-
-    explicit FetchResult(bool r) : result(r), payload(nullptr) {;}
-    explicit FetchResult(bool r, const std::shared_ptr<json>& j) : result(r), payload(j) {;}
-
-    const bool result;
-
-    const json& getJson() {
-        return *payload;
-    }
-
-private:
-
-    const std::shared_ptr<const json> payload;
-
-};
 
 
 class IStorage {
@@ -91,6 +63,31 @@ public:
 private:
 
     const std::unique_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>> data = std::make_unique<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>>();
+
+};
+
+
+
+
+class HybridStorage: public IStorage {
+
+public:
+
+    explicit HybridStorage(std::string directory): directory(std::move(directory)) {;}
+
+    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
+
+    FetchResult fetch(std::string table, std::string key) override;
+
+private:
+
+    std::unique_ptr<MapStorage> inMemoryStorage;
+
+    std::vector<std::unique_ptr<DiskStorage>> diskStorage;
+
+    const std::string directory;
+
+    std::mutex lock;
 
 };
 

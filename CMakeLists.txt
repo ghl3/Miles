@@ -18,13 +18,24 @@ ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} C
 #-------------------
 # set common include folder for module
 #-------------------
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include include/utils.h src/storage.cxx)
+set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include) # include/utils.h src/storage.cxx include/key_val_file.h include/results.h src/key_val_file.cxx test/key_val_file_test.cxx)
+
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cxx)
+
+include_directories("include")
+include_directories("${DEPS_ROOT}/include")
+include_directories(${COMMON_INCLUDES})
+
+file(GLOB SOURCES "src/*.cxx")
+link_directories("${DEPS_ROOT}/lib")
 
 find_package(Tcmalloc)
 find_package(Threads)
 find_package(OpenSSL)
 
-FIND_PACKAGE( Boost 1.40 COMPONENTS program_options system filesystem REQUIRED )
+find_package( Boost 1.40 COMPONENTS program_options system filesystem REQUIRED )
+include_directories( ${Boost_INCLUDE_DIR} )
+include_directories( ${Boost_INCLUDE_DIR} )
 
 if(OPENSSL_FOUND)
   include_directories(${OPENSSL_INCLUDE_DIR})
@@ -39,37 +50,25 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-include_directories("include")
-file(GLOB SOURCES "src/*.cxx")
-
-INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #link_directories(${Boost_LIBRARY_DIR})
-
-include_directories("${DEPS_ROOT}/include")
-link_directories("${DEPS_ROOT}/lib")
 #link_directories("${DEPS_ROOT}/lib64")
 
-include_directories( ${Boost_INCLUDE_DIR} )
+#add_executable(miles src/miles.cxx src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+#target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} )
 
-add_executable(miles src/miles.cxx src/storage.cxx)
-TARGET_LINK_LIBRARIES(miles LINK_PUBLIC ${Boost_LIBRARIES} )
-
-add_executable(server src/server.cxx include/storage.h src/storage.cxx)
-TARGET_LINK_LIBRARIES(server LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
-
+add_executable(miles src/miles.cxx ${SRC_FILES}) # include/storage.h src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
 
 #-------------------
 # Test
 #-------------------
 enable_testing()
-include_directories(${COMMON_INCLUDES})
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(test test/all.cxx ${TEST_SRC_FILES} ${COMMON_INCLUDES} src/storage.cxx)
-add_dependencies(test "googletest.git")
-target_link_libraries(test gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-
+add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx ) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+add_dependencies(testall "googletest.git")
+target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 # from list of files we'll create tests test_name.cpp -> test_name
 # foreach(_test_file ${TEST_SRC_FILES})
