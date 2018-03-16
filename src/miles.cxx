@@ -10,7 +10,7 @@
 using json = nlohmann::json;
 
 
-std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage>& storage) {
+std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& storage) {
 
     auto app = std::make_unique<crow::SimpleApp>();
 
@@ -84,7 +84,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<IStorage>& s
 int main() {
 
     // Initialize the Sorage Engine
-    std::unique_ptr<IStorage> storage = std::make_unique<MapStorage>();
+    std::unique_ptr<Storage> storage = std::make_unique<Storage>("foo", 10);
 
     // Initialize the webserver
     auto app = createServer(std::move(storage));

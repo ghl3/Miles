@@ -5,10 +5,9 @@
 #ifndef MILES_SSTABLE_H
 #define MILES_SSTABLE_H
 
-
+#include <fstream>
 #include <utility>
 
-#include "storage.h"
 #include "key_storage.h"
 #include "key_map.h"
 
@@ -21,16 +20,15 @@ public:
 
     static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
-
 private:
 
-    explicit SSTable(std::string fileName, std::fstream file):
+    explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file):
             fileName(std::move(fileName)),
             file(std::move(file)) {;}
 
     const std::string fileName;
 
-    std::fstream file;
+    std::unique_ptr<std::fstream> file;
 
 };
 

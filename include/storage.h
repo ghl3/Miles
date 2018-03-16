@@ -5,13 +5,11 @@
 #include <string>
 #include <utility>
 #include <fstream>
-#include <sstream>
 #include <unordered_map>
 
-
-#include "results.h"
 #include "json.h"
-#include "sstable.h"
+#include "results.h"
+#include "hybrid_key_storage.h"
 
 #ifndef MILES_STORAGE_H
 #define MILES_STORAGE_H
@@ -19,59 +17,29 @@
 using json = nlohmann::json;
 
 
-class IStorage {
+
+class Storage {
+
 
 public:
 
-    IStorage() = default;
-    virtual ~IStorage() = default;
+    explicit Storage(std::string directory, size_t maxStorageSize):
+            directory(directory),
+            maxStorageSize(maxStorageSize)
+    {;}
 
-    IStorage(IStorage const &) = delete;
-    void operator=(IStorage const &x) = delete;
+    StoreResult store(std::string table, std::string key,  std::unique_ptr<json> payload);
 
-    virtual StoreResult store(std::string, std::string, std::unique_ptr<json>)=0;
-    virtual FetchResult fetch(std::string, std::string)=0;
-};
-
-
-class DiskStorage: public IStorage {
-
-public:
-
-    explicit DiskStorage(std::string directory): directory(std::move(directory)) {;}
-
-    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
-
-    FetchResult fetch(std::string table, std::string key) override;
+    FetchResult fetch(std::string table, std::string key);
 
 private:
+
+    const size_t maxStorageSize;
 
     const std::string directory;
 
-    const std::unique_ptr<std::unordered_map<std::string, std::fstream>> tableMap = std::make_unique<std::unordered_map<std::string, std::fstream>>();
+    std::unordered_map<std::string, std::unique_ptr<HybridKeyStorage>> tableMap;
 
 };
-
-
-class MapStorage: public IStorage {
-
-public:
-
-    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
-
-    FetchResult fetch(std::string table, std::string key) override;
-
-    size_t size() {
-        return data->size();
-    };
-
-    bool hasKeyInTable(const std::string& table, const std::string& key);
-
-private:
-
-    const std::unique_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>> data = std::make_unique<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>>();
-
-};
-
 
 #endif //MILES_STORAGE_H

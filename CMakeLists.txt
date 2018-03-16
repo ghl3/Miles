@@ -18,7 +18,7 @@ ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} C
 #-------------------
 # set common include folder for module
 #-------------------
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include) # include/utils.h src/storage.cxx include/key_val_file.h include/results.h src/key_val_file.cxx test/key_val_file_test.cxx)
+set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include) # include/utils.h src/storage.cxx include/key_val_file.h include/results.h  test/key_val_file_test.cxx)
 
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cxx)
 
@@ -61,6 +61,6 @@ enable_testing()
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h)
 add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
