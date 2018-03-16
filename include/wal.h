@@ -14,8 +14,8 @@ class Wal {
 
 public:
 
-    explicit Wal(std::string path): file(path) {;}
-
+    explicit Wal(std::string path):
+            file(path, std::fstream::in | std::fstream::out | std::fstream::trunc) {;}
 
     bool log(std::string key, const json* payload);
 
