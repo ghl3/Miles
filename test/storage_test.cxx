@@ -33,8 +33,6 @@ TEST(storage_test, disk_storage)
 
     TempDirectory tmpDir("/tmp/miles/storage_test_");
 
-    //auto fileName = (std::stringstream() << tmpDir.getPath() << "/" << table << ".dat").str();
-
     auto storage = std::make_unique<DiskStorage>(tmpDir.getPath());
     EXPECT_EQ(false, storage->fetch("foo", "bar").success);
 

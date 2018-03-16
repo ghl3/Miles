@@ -34,30 +34,4 @@ private:
 
 };
 
-
-/*
-class SSTable: public IKeyStorage {
-
-public:
-
-    explicit SSTable(std::string directory): directory(std::move(directory)) {;}
-
-    FetchResult fetch(std::string key) override;
-
-private:
-
-    //StoreResult appendKey(std::string key, std::unique_ptr<json> payload);
-
-    const std::string directory;
-
-    const std::string prefix;
-
-    const std::unique_ptr<std::vector<std::pair<std::string, std::fstream>>> tableFiles = std::make_unique<std::vector<std::pair<std::string, std::fstream>>>(); //   std::unique_ptr<std::unordered_map<std::string, std::fstream>> tableMap = std::make_unique<std::unordered_map<std::string, std::fstream>>();
-
-};
-*/
-
-
-
-
 #endif //MILES_SSTABLE_H
