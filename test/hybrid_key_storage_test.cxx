@@ -73,4 +73,16 @@ TEST(hybrid_key_storage, move_to_disk)
                          "d\n"
                          "[[\"a\",10],[\"b\",20]]\n");
 
+    std::string walFile = fileToString(tmpDir.getPath() + "/wal.log");
+    EXPECT_EQ(walFile, "a\n"
+                         "[[\"a\",10],[\"b\",20]]\n"
+                         "b\n"
+                         "[[\"a\",10],[\"b\",20]]\n"
+                         "d\n"
+                         "[[\"a\",10],[\"b\",20]]\n"
+                         "c\n"
+                         "[[\"a\",10],[\"b\",20]]\n"
+                         "z\n"
+                         "[[\"a\",10],[\"b\",20]]\n");
+
 }

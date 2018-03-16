@@ -9,6 +9,9 @@
 
 
 bool Wal::log(std::string key, const json* payload) {
+    this->file << key << std::endl;
+    this->file << payload->dump() << std::endl;
+
     return true;
 }
 
