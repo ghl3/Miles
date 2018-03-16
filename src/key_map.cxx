@@ -7,22 +7,22 @@
 
 
 FetchResult KeyMap::fetch(std::string key) {
-    if(data->find(key) == data->end()) {
+    if(data.find(key) == data.end()) {
         return FetchResult(false);
     } else {
-        return FetchResult(true, (*data)[key]);
+        return FetchResult(true, data[key]);
     }
 }
 
 StoreResult KeyMap::store(std::string key,  std::unique_ptr<json> payload) {
 
     // The underlying storage takes ownership of the JSON
-    (*data)[key] = std::move(payload);
+    data[key] = std::move(payload);
 
     return StoreResult(true);
 }
 
 
 bool KeyMap::containsKey(const std::string& key) const {
-    return !(data->find(key) == data->end());
+    return !(data.find(key) == data.end());
 }

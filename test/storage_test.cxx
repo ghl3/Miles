@@ -17,7 +17,6 @@ TEST(storage_test, map_storage)
 
     TempDirectory tmpDir("/tmp/miles/storage_test_");
 
-
     auto storage = std::make_unique<Storage>(tmpDir.getPath(), 10);
     EXPECT_EQ(false, storage->fetch("foo", "bar").success);
 

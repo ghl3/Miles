@@ -23,15 +23,15 @@ public:
     bool containsKey(const std::string& key) const;
 
     size_t size() {
-        return data->size();
+        return data.size();
     };
 
-    std::unordered_map<std::string, std::shared_ptr<json>>::const_iterator begin() const { return data->cbegin(); }
-    std::unordered_map<std::string, std::shared_ptr<json>>::const_iterator end() const { return data->cend(); }
+    std::map<std::string, std::shared_ptr<json>>::const_iterator begin() const { return data.cbegin(); }
+    std::map<std::string, std::shared_ptr<json>>::const_iterator end() const { return data.cend(); }
 
 private:
 
-    const std::unique_ptr<std::unordered_map<std::string, std::shared_ptr<json>>> data = std::make_unique<std::unordered_map<std::string, std::shared_ptr<json>>>();
+    std::map<std::string, std::shared_ptr<json>> data;
 
 };
 

@@ -24,8 +24,8 @@ class Storage {
 public:
 
     explicit Storage(std::string directory, size_t maxStorageSize):
-            directory(directory),
-            maxStorageSize(maxStorageSize)
+            maxStorageSize(maxStorageSize),
+            directory(directory)
     {;}
 
     StoreResult store(std::string table, std::string key,  std::unique_ptr<json> payload);

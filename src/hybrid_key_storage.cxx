@@ -21,7 +21,7 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
     // If the in-memory storage is at the max size,
     // move it to disk and create a fresh in-memory storage
     if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
-        std::string fileName = (std::stringstream() << directory << "/" << "foobar" << ".dat").str();
+        std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
         auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
         this->diskStorage.push_back(std::move(newSSTable));
         this->inMemoryStorage = std::make_unique<KeyMap>();

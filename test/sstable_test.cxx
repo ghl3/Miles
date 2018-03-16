@@ -15,23 +15,50 @@ using json = nlohmann::json;
 
 TEST(sstable_test, map_storage)
 {
+    auto keyMap = std::make_unique<KeyMap>();
+    auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));
+    auto storeResult = keyMap->store("foo", std::move(payload));
+    EXPECT_EQ(true, storeResult.success);
 
-auto keyMap = std::make_unique<KeyMap>();
-auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));
-auto storeResult = keyMap->store("foo", std::move(payload));
-EXPECT_EQ(true, storeResult.success);
+    TempDirectory tmpDir("/tmp/miles/ss_table_test_");
+
+    std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
+
+    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+
+    EXPECT_EQ(true, ssTable->fetch("foo").success);
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
+    EXPECT_EQ(false, ssTable->fetch("bar").success);
+
+}
 
 
-TempDirectory tmpDir("/tmp/miles/ss_table_test_");
+TEST(sstable_test, many_keys)
+{
+    auto keyMap = std::make_unique<KeyMap>();
+    //auto payload =
 
-std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
+    keyMap->store("foo", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
 
+    keyMap->store("bar", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
 
-auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+    keyMap->store("baz", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
 
+    //auto storeResult = keyMap->store("foo", std::move(payload));
 
-EXPECT_EQ(true, ssTable->fetch("foo").success);
-EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
-EXPECT_EQ(false, ssTable->fetch("bar").success);
+//    EXPECT_EQ(true, storeResult.success);
+
+    TempDirectory tmpDir("/tmp/miles/ss_table_test_");
+
+    std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
+
+    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+
+    EXPECT_EQ(true, ssTable->fetch("foo").success);
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
+    EXPECT_EQ(false, ssTable->fetch("bar").success);
 
 }
