@@ -12,6 +12,8 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
 
     std::lock_guard<std::mutex> guard(this->lock);
 
+    wal.log(key, payload.get());
+
     // If the key is already in the in-memory storage, we
     //
     if (this->inMemoryStorage->containsKey(key)) {
@@ -21,9 +23,8 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
     // If the in-memory storage is at the max size,
     // move it to disk and create a fresh in-memory storage
     if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
-        std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
-        auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
-        this->diskStorage.push_back(std::move(newSSTable));
+        this->moveInMemoryToDisk();
+        this->wal.clear();
         this->inMemoryStorage = std::make_unique<KeyMap>();
     }
 
@@ -33,7 +34,31 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
 
 
 FetchResult HybridKeyStorage::fetch(std::string key) {
+
     std::lock_guard<std::mutex> guard(this->lock);
-    return this->inMemoryStorage->fetch(key);
+
+    // First, check the in-memory storage
+    auto inMemoryResult = this->inMemoryStorage->fetch(key);
+    if (inMemoryResult.success) {
+        return inMemoryResult;
+    } else {
+
+        // Iterate in reverse order
+        for(auto rit = diskStorage.rbegin(); rit != diskStorage.rend(); ++rit) {
+            auto sstableResult = (*rit)->fetch(key);
+            if (sstableResult.success) {
+                return sstableResult;
+            }
+        }
+
+        return FetchResult(false);
+    }
 }
 
+
+bool HybridKeyStorage::moveInMemoryToDisk() {
+    std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
+    auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
+    this->diskStorage.push_back(std::move(newSSTable));
+    return true;
+}

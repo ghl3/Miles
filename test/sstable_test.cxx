@@ -47,18 +47,14 @@ TEST(sstable_test, many_keys)
     keyMap->store("baz", std::make_unique<json>(
             json::array({{"a", 10}, {"b", 20},})));
 
-    //auto storeResult = keyMap->store("foo", std::move(payload));
-
-//    EXPECT_EQ(true, storeResult.success);
-
     TempDirectory tmpDir("/tmp/miles/ss_table_test_");
-
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
 
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
     EXPECT_EQ(true, ssTable->fetch("foo").success);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
-    EXPECT_EQ(false, ssTable->fetch("bar").success);
+    EXPECT_EQ(true, ssTable->fetch("bar").success);
+    EXPECT_EQ(false, ssTable->fetch("fish").success);
 
 }

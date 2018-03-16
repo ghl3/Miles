@@ -9,6 +9,7 @@
 #include "key_storage.h"
 #include "key_map.h"
 #include "sstable.h"
+#include "wal.h"
 
 
 class HybridKeyStorage: public IKeyStorage {
@@ -20,9 +21,11 @@ class HybridKeyStorage: public IKeyStorage {
 public:
 
     explicit HybridKeyStorage(std::string directory, size_t maxInMemorySize):
+            directory(std::move(directory)),
             maxInMemorySize(maxInMemorySize),
             inMemoryStorage(std::make_unique<KeyMap>()),
-            directory(std::move(directory)) {;}
+            wal((std::stringstream() << directory << "wal.log").str())
+           {;}
 
     FetchResult fetch(std::string key) override;
 
@@ -31,13 +34,19 @@ public:
 
 private:
 
+
+    bool moveInMemoryToDisk();
+
+
+    const std::string directory;
+
     const size_t maxInMemorySize;
 
     std::unique_ptr<KeyMap> inMemoryStorage;
 
     std::vector<std::unique_ptr<SSTable>> diskStorage;
 
-    const std::string directory;
+    Wal wal;
 
     std::mutex lock;
 
