@@ -11,6 +11,7 @@
 
 #include "results.h"
 #include "json.h"
+#include "sstable.h"
 
 #ifndef MILES_STORAGE_H
 #define MILES_STORAGE_H
@@ -60,6 +61,12 @@ public:
 
     FetchResult fetch(std::string table, std::string key) override;
 
+    size_t size() {
+        return data->size();
+    };
+
+    bool hasKeyInTable(const std::string& table, const std::string& key);
+
 private:
 
     const std::unique_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>> data = std::make_unique<std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<json>>>>();
@@ -68,12 +75,16 @@ private:
 
 
 
-
 class HybridStorage: public IStorage {
+
+    // TODO: Make a HybridTableStorage, and then make the
+    // storage engine have a list of HybridTableStorage objects
+    // (one per table)
 
 public:
 
-    explicit HybridStorage(std::string directory): directory(std::move(directory)) {;}
+    explicit HybridStorage(std::string directory, size_t maxInMemorySize):
+            directory(std::move(directory)), maxInMemorySize(maxInMemorySize){;}
 
     StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
 
@@ -81,9 +92,11 @@ public:
 
 private:
 
-    std::unique_ptr<MapStorage> inMemoryStorage;
+    const size_t maxInMemorySize;
 
-    std::vector<std::unique_ptr<DiskStorage>> diskStorage;
+    std::unique_ptr<KeyMap> inMemoryStorage;
+
+    std::vector<SSTable> diskStorage;
 
     const std::string directory;
 

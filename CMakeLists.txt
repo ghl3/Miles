@@ -56,7 +56,7 @@ endif(CCACHE_FOUND)
 #add_executable(miles src/miles.cxx src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 #target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} )
 
-add_executable(miles src/miles.cxx ${SRC_FILES}) # include/storage.h src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_storage.h src/sstable.cxx include/key_map.h src/key_map.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx) # include/storage.h src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
 
 #-------------------
@@ -66,7 +66,7 @@ enable_testing()
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx ) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 

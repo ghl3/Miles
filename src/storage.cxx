@@ -73,11 +73,36 @@ FetchResult MapStorage::fetch(std::string table, std::string key) {
 }
 
 
+bool MapStorage::hasKeyInTable(const std::string& table, const std::string& key) {
+    if(data->find(table) == data->end()) {
+        return false;
+    } else {
+        auto keyMap = (*data)[table];
+        return !(keyMap.find(key) == keyMap.end());
+    }
+}
+
 
 StoreResult HybridStorage::store(std::string table, std::string key, std::unique_ptr<json> payload) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
+    // If the key is already in the in-memory storage, we
+    //
+    if (this->inMemoryStorage->hasKeyInTable(table, key)) {
+        return this->inMemoryStorage->store(table, key, std::move(payload));
+    }
+
+    // If the in-memory storage is at the max size,
+    // move it to disk and create a fresh in-memory storage
+    if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
+        std::string fileName = (std::stringstream() << directory << "/" << table << ".dat").str(),
+        auto newSSTable = SSTable::createFromKeyMap(this->inMemoryStorage) = moveToDisk(this->inMemoryStorage);
+        this->diskStorage->add(newDiskStorage);
+        this->inMemoryStorage = InMemoryStorage::create();
+    }
+
+    // Save the key to in-memory storage
     return this->inMemoryStorage->store(table, key, std::move(payload));
 }
 
