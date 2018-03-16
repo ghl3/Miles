@@ -21,6 +21,7 @@ public:
 
     explicit HybridKeyStorage(std::string directory, size_t maxInMemorySize):
             maxInMemorySize(maxInMemorySize),
+            inMemoryStorage(std::make_unique<KeyMap>()),
             directory(std::move(directory)) {;}
 
     FetchResult fetch(std::string key) override;

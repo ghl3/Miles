@@ -7,8 +7,6 @@
 
 StoreResult DiskStorage::store(std::string table, std::string key, std::unique_ptr<json> payload) {
 
-    //std::lock_guard<std::mutex> guard(this->diskMutex);
-
     if (this->tableMap->find(table) == this->tableMap->end()) {
         (*this->tableMap)[table] = std::fstream((std::stringstream() << directory << "/" << table << ".dat").str(),
                                                 std::fstream::in | std::fstream::out | std::fstream::trunc);

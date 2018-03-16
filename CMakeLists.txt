@@ -50,13 +50,8 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-#link_directories(${Boost_LIBRARY_DIR})
-#link_directories("${DEPS_ROOT}/lib64")
+add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_storage.h src/sstable.cxx include/key_map.h src/key_map.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx)
 
-#add_executable(miles src/miles.cxx src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
-#target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} )
-
-add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_storage.h src/sstable.cxx include/key_map.h src/key_map.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx) # include/storage.h src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
 
 #-------------------
@@ -69,13 +64,3 @@ file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-
-# from list of files we'll create tests test_name.cpp -> test_name
-# foreach(_test_file ${TEST_SRC_FILES})
-#     get_filename_component(_test_name ${_test_file} NAME_WE)
-#     add_executable(${_test_name} ${_test_file} include/storage.h)
-#     add_dependencies(${_test_name} "googletest.git")
-#     target_link_libraries(${_test_name} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
-#     add_test(${_test_name} ${_test_name})
-#     set_tests_properties(${_test_name} PROPERTIES TIMEOUT 5)
-# endforeach()
