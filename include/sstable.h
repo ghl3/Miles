@@ -19,7 +19,7 @@ public:
 
     FetchResult fetch(std::string key) override;
 
-    static SSTable createFromKeyMap(KeyMap km, std::string fileName);
+    static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
 
 private:

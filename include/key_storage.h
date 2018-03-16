@@ -19,7 +19,7 @@ public:
     void operator=(IKeyStorage const &x) = delete;
 
     //virtual StoreResult store(std::string, std::unique_ptr<json>)=0;
-    virtual FetchResult fetch(std::string) const =0;
+    virtual FetchResult fetch(std::string)=0;
 };
 
 

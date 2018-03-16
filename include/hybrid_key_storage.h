@@ -20,9 +20,10 @@ class HybridKeyStorage: public IKeyStorage {
 public:
 
     explicit HybridKeyStorage(std::string directory, size_t maxInMemorySize):
-            directory(std::move(directory)), maxInMemorySize(maxInMemorySize){;}
+            maxInMemorySize(maxInMemorySize),
+            directory(std::move(directory)) {;}
 
-    FetchResult fetch(std::string key) const override;
+    FetchResult fetch(std::string key) override;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
 
@@ -33,7 +34,7 @@ private:
 
     std::unique_ptr<KeyMap> inMemoryStorage;
 
-    std::vector<SSTable> diskStorage;
+    std::vector<std::unique_ptr<SSTable>> diskStorage;
 
     const std::string directory;
 

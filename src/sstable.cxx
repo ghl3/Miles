@@ -23,7 +23,7 @@ StoreResult SSTable::store(std::string key, std::unique_ptr<json> payload) {
 }
 */
 
-FetchResult SSTable::fetch(std::string key){
+FetchResult SSTable::fetch(std::string key) {
 
     file.seekg(0);
     std::string lineKey;
@@ -40,6 +40,7 @@ FetchResult SSTable::fetch(std::string key){
     return FetchResult(false);
 }
 
+
 /*
 StoreResult SSTable::appendKey(std::string key, std::unique_ptr<json> payload) {
     if (this->tableMap->find(table) == this->tableMap->end()) {
@@ -54,7 +55,14 @@ StoreResult SSTable::appendKey(std::string key, std::unique_ptr<json> payload) {
 
 */
 
-SSTable SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
+/*
+SSTable SSTable::createFromKeyMap(KeyMap km, std::string fileName) {
+    return SSTable(__1::basic_string < char, char_traits < char > , allocator < char >> (), __1::basic_fstream < char,
+                   char_traits < char >> ());
+}
+*/
+
+std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
 
     // Create a new file
     auto file = std::fstream(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc);
@@ -64,5 +72,6 @@ SSTable SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
         file << keyValPair.second->dump() << std::endl;
     }
 
-    return SSTable(fileName, std::move(file));
+    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+
 }

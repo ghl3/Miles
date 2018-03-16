@@ -23,7 +23,7 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
     if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
         std::string fileName = (std::stringstream() << directory << "/" << "foobar" << ".dat").str();
         auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName); // = moveToDisk(this->inMemoryStorage);
-        this->diskStorage.push_back(newSSTable); //->add(newDiskStorage);
+        this->diskStorage.push_back(std::move(newSSTable)); //->add(newDiskStorage);
         this->inMemoryStorage = std::make_unique<KeyMap>(); //InMemoryStorage::create();
     }
 
@@ -32,7 +32,7 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
 }
 
 
-FetchResult HybridKeyStorage::fetch(std::string key) const {
+FetchResult HybridKeyStorage::fetch(std::string key) {
     std::lock_guard<std::mutex> guard(this->lock);
     return this->inMemoryStorage->fetch(key);
 }

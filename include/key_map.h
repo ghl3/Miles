@@ -5,7 +5,6 @@
 #ifndef MILES_KEY_MAP_H
 #define MILES_KEY_MAP_H
 
-
 #include <string>
 #include <unordered_map>
 #include "results.h"
@@ -17,7 +16,7 @@ public:
 
     explicit KeyMap() {;}
 
-    FetchResult fetch(std::string key) const override;
+    FetchResult fetch(std::string key) override;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
 
@@ -27,8 +26,8 @@ public:
         return data->size();
     };
 
-    std::unordered_map::const_iterator begin() const { return data->cbegin(); }
-    std::unordered_map::const_iterator end() const { return data->cend(); }
+    std::unordered_map<std::string, std::shared_ptr<json>>::const_iterator begin() const { return data->cbegin(); }
+    std::unordered_map<std::string, std::shared_ptr<json>>::const_iterator end() const { return data->cend(); }
 
 private:
 

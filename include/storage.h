@@ -74,35 +74,4 @@ private:
 };
 
 
-
-class HybridStorage: public IStorage {
-
-    // TODO: Make a HybridTableStorage, and then make the
-    // storage engine have a list of HybridTableStorage objects
-    // (one per table)
-
-public:
-
-    explicit HybridStorage(std::string directory, size_t maxInMemorySize):
-            directory(std::move(directory)), maxInMemorySize(maxInMemorySize){;}
-
-    StoreResult store(std::string table, std::string key, std::unique_ptr<json> payload) override;
-
-    FetchResult fetch(std::string table, std::string key) override;
-
-private:
-
-    const size_t maxInMemorySize;
-
-    std::unique_ptr<KeyMap> inMemoryStorage;
-
-    std::vector<SSTable> diskStorage;
-
-    const std::string directory;
-
-    std::mutex lock;
-
-};
-
-
 #endif //MILES_STORAGE_H

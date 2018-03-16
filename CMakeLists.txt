@@ -66,7 +66,7 @@ enable_testing()
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
+add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/key_val_file.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx) # ${COMMON_INCLUDES} src/storage.cxx include/key_val_file.h src/key_val_file.cxx)
 add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 

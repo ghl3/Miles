@@ -6,7 +6,7 @@
 #include <key_map.h>
 
 
-FetchResult KeyMap::fetch(std::string key) const {
+FetchResult KeyMap::fetch(std::string key) {
     if(data->find(key) == data->end()) {
         return FetchResult(false);
     } else {
