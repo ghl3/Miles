@@ -5,6 +5,8 @@
 #ifndef MILES_HYBRID_KEY_STORAGE_H
 #define MILES_HYBRID_KEY_STORAGE_H
 
+#include <vector>
+
 #include "key_storage.h"
 #include "key_map.h"
 #include "sstable.h"
@@ -23,12 +25,16 @@ public:
             directory(std::move(directory)),
             maxInMemorySize(maxInMemorySize),
             inMemoryStorage(std::make_unique<KeyMap>()),
-            wal((std::stringstream() << this->directory << "/wal.log").str())
+            wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str()))
            {;}
 
     FetchResult fetch(std::string key) override;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
+
+    static std::vector<std::string>  getDataFiles(std::string directory);
+
+    static std::unique_ptr<HybridKeyStorage> buildFromDirectory(std::string directory, size_t maxInMemorySize);
 
 private:
 
@@ -42,7 +48,7 @@ private:
 
     std::vector<std::unique_ptr<SSTable>> diskStorage;
 
-    Wal wal;
+    std::unique_ptr<Wal> wal;
 
     std::mutex lock;
 

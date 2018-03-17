@@ -14,7 +14,8 @@ FetchResult KeyMap::fetch(std::string key) {
     }
 }
 
-StoreResult KeyMap::store(std::string key,  std::unique_ptr<json> payload) {
+
+StoreResult KeyMap::store(std::string key, std::unique_ptr<json> payload) {
 
     // The underlying storage takes ownership of the JSON
     data[key] = std::move(payload);
@@ -26,3 +27,4 @@ StoreResult KeyMap::store(std::string key,  std::unique_ptr<json> payload) {
 bool KeyMap::containsKey(const std::string& key) const {
     return !(data.find(key) == data.end());
 }
+

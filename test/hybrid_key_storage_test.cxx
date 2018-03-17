@@ -86,3 +86,26 @@ TEST(hybrid_key_storage, move_to_disk)
                          "[[\"a\",10],[\"b\",20]]\n");
 
 }
+
+
+
+
+TEST(hybrid_key_storage, reload_from_file)
+{
+
+    TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
+
+    {
+        auto storage = std::make_unique<HybridKeyStorage>(tmpDir.getPath(), 2);
+        storage->store("a", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+        storage->store("b", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+        storage->store("d", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+        storage->store("c", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+        storage->store("z", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+    }
+
+    auto storage = HybridKeyStorage::buildFromDirectory(tmpDir.getPath(), 2);
+
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("a").getJson());
+
+}

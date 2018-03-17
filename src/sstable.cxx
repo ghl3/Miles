@@ -39,3 +39,13 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
 
 }
+
+
+
+std::unique_ptr<SSTable> SSTable::createFromFileName(std::string fileName) {
+
+    // Create a new file
+    auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc);
+
+    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+}

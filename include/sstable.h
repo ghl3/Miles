@@ -20,6 +20,9 @@ public:
 
     static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
+    static std::unique_ptr<SSTable> createFromFileName(std::string fileName);
+
+
 private:
 
     explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file):
