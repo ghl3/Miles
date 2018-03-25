@@ -33,7 +33,7 @@ find_package(Tcmalloc)
 find_package(Threads)
 find_package(OpenSSL)
 
-find_package( Boost 1.40 COMPONENTS program_options system filesystem regex REQUIRED )
+find_package( Boost 1.40 COMPONENTS program_options system filesystem regex iostreams REQUIRED )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 
@@ -50,9 +50,9 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_storage.h src/sstable.cxx include/key_map.h src/key_map.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx include/wal.h src/wal.cxx)
+add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_storage.h src/sstable.cxx include/key_map.h src/key_map.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx include/wal.h src/wal.cxx include/hashes.h include/zip.h)
 
-target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY})
+target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})
 
 #-------------------
 # Test
@@ -61,6 +61,6 @@ enable_testing()
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
 
-add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx src/wal.cxx test/wal_test.cxx)
+add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx src/wal.cxx test/wal_test.cxx include/hashes.h)
 add_dependencies(testall "googletest.git")
-target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} )
+target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})

@@ -36,7 +36,6 @@ TEST(sstable_test, map_storage)
 TEST(sstable_test, many_keys)
 {
     auto keyMap = std::make_unique<KeyMap>();
-    //auto payload =
 
     keyMap->store("foo", std::make_unique<json>(
             json::array({{"a", 10}, {"b", 20},})));
@@ -56,5 +55,35 @@ TEST(sstable_test, many_keys)
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
     EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
     EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
+
+}
+
+
+
+
+TEST(sstable_test, index_test)
+{
+    auto keyMap = std::make_unique<KeyMap>();
+
+    keyMap->store("foo", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
+
+    keyMap->store("bar", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
+
+    keyMap->store("baz", std::make_unique<json>(
+            json::array({{"a", 10}, {"b", 20},})));
+
+    TempDirectory tmpDir("/tmp/miles/ss_table_compressed_test_");
+    std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
+
+    auto ssTable = SSTable::createCompressedFromKeyMap(*keyMap, fname);
+
+    //EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
+    //EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
+    //EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
+    //EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
+
+    std::cout << "Done" << std::endl;
 
 }
