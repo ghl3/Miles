@@ -22,7 +22,7 @@ public:
 
     bool containsKey(const std::string& key) const;
 
-    size_t size() {
+    size_t size() const {
         return data.size();
     };
 

@@ -71,8 +71,10 @@ TEST(sstable_test, index_test)
     keyMap->store("bar", std::make_unique<json>(
             json::array({{"a", 10}, {"b", 20},})));
 
+    /*
     keyMap->store("baz", std::make_unique<json>(
             json::array({{"a", 10}, {"b", 20},})));
+            */
 
     TempDirectory tmpDir("/tmp/miles/ss_table_compressed_test_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
@@ -83,6 +85,8 @@ TEST(sstable_test, index_test)
     //EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
     //EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
     //EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
+
+    ssTable->buildIndex();
 
     std::cout << "Done" << std::endl;
 

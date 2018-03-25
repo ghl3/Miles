@@ -7,6 +7,7 @@
 #include <results.h>
 #include <sstable.h>
 #include <zip.h>
+#include <iostream>
 
 
 FetchResult SSTable::fetch(std::string key) {
@@ -58,23 +59,27 @@ std::unique_ptr<SSTable> SSTable::createCompressedFromKeyMap(const KeyMap& km, s
     // Create a new file
     auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc | std::fstream::binary);
 
-    std::vector<IndexEntry> index;
+    // Add the header/metadata to the file
+    // For now, this only consists of an initial integer
+    // that represents the number of bits
+    uint64_t numKeys = static_cast<uint64_t>(km.size());
+    file->write(reinterpret_cast<char*>(&numKeys), sizeof(uint64_t));
 
-    size_t offsetInBytes = 0;
+    // Then, write each value to the file and maintain an index
+    // for each entry
+    uint64_t offsetInBytes = sizeof(numKeys);
+    std::vector<IndexEntry> index;
 
     for (auto keyValPair: km) {
 
-        size_t keyHash = std::hash<std::string>{}(keyValPair.first);
+        uint64_t keyHash = std::hash<std::string>{}(keyValPair.first);
         const char* compressedPayload = Zip::compress(keyValPair.second->dump()).c_str();
-        //std::string compressedPayload = keyValPair.second->dump();
 
-        size_t sizeInBytes = sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
+        uint64_t sizeInBytes = sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
         index.emplace_back(IndexEntry(keyHash, offsetInBytes, sizeInBytes));
         offsetInBytes += sizeInBytes;
 
         file->write(reinterpret_cast<char*>(&compressedPayload), sizeof(compressedPayload));
-
-        //*file << compressedPayload;
     }
 
     std::sort(begin(index), end(index), [](const auto& lhs, const auto& rhs) {return lhs.keyHash < rhs.keyHash;});
@@ -83,14 +88,39 @@ std::unique_ptr<SSTable> SSTable::createCompressedFromKeyMap(const KeyMap& km, s
         file->write(reinterpret_cast<char*>(&idx.keyHash), sizeof(idx.keyHash));
         file->write(reinterpret_cast<char*>(&idx.offset), sizeof(idx.offset));
         file->write(reinterpret_cast<char*>(&idx.length), sizeof(idx.length));
-        //*file << idx.keyHash << '|';
-        //*file << idx.offset << '|';
-        //*file << idx.length << '|';
     }
 
     *file << std::endl;
 
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+}
+
+std::vector<IndexEntry> SSTable::buildIndex() {
+
+    uint64_t numKeys;
+
+    file->seekg(0);
+    file->read(reinterpret_cast<char *>(&numKeys), sizeof(uint64_t));
+
+    // 3 uint64_t entries per index
+    // each uint64_t is 8 bytes
+    // there are numKeys entries
+    uint64_t indexSize = 3 * sizeof(uint64_t) * numKeys;
+
+    // Jump to the end of the file
+    file->seekg(0, std::ios::end);
+    long long int fileSize = file->tellg();
+    uint64_t indexOffset = fileSize - indexSize;
+
+    std::cout << " Num Keys: " << numKeys
+              << " index size: " << indexSize
+              << " file size: " << fileSize
+              << " index offset: " << indexOffset
+              << std::endl;
+
+    // The index consists of the last 3*sizeof(size_t)*numKeys of the file;
+
+    return std::vector<IndexEntry>();
 }
 
 /*

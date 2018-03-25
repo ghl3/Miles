@@ -16,15 +16,15 @@ class IndexEntry {
 
 public:
 
-    explicit IndexEntry(size_t keyHash,  size_t offset,  size_t length):
+    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length):
             keyHash(keyHash),
             offset(offset),
             length(length)
     {;}
 
-    size_t keyHash;
-    size_t offset;
-    size_t length;
+    uint64_t keyHash;
+    uint64_t offset;
+    uint64_t length;
     std::string payload;
 
 };
@@ -68,13 +68,13 @@ public:
 
     FetchResult fetch(std::string key) override;
 
+    std::vector<IndexEntry> buildIndex();
+
     static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
     static std::unique_ptr<SSTable> createCompressedFromKeyMap(const KeyMap& km, std::string fileName);
 
     static std::unique_ptr<SSTable> createFromFileName(std::string fileName);
-
-    //static std::string buildStringIndex(std::vector<IndexEntry>& index);
 
 private:
 
