@@ -13,6 +13,16 @@
 #include "wal.h"
 
 
+// A HybridKeyStorage is a storage engine that combines
+// on-disk SS-Tables and an in-memory key-val map
+// (which is backed by a Write-Ahead-Log for durability).
+// New writes are written to the in-memory storage and the WAL.
+//
+// When the in-memory storage reaches a maximum size, it is
+// copied to make a new SSTable on-disk, and it and the WAL
+// are then cleared (the WAL should always be in-sync with
+// the in-memory storage).
+//
 class HybridKeyStorage: public IKeyStorage {
 
     // TODO: Make a HybridTableStorage, and then make the
@@ -28,6 +38,8 @@ public:
             wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str()))
            {;}
 
+    ~HybridKeyStorage() override;
+
     FetchResult fetch(std::string key) override;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
@@ -38,7 +50,7 @@ public:
 
 private:
 
-    bool moveInMemoryToDisk();
+    bool saveInMemoryToDisk();
 
     const std::string directory;
 

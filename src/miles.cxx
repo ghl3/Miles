@@ -27,7 +27,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
                      auto payload = std::make_unique<json>(json::parse(req.body));
                      std::cout << *payload << std::endl;
                      auto storageResult = storage->store(table, key, std::move(payload));
-                     std::cout << "Did we store successfully: " << storageResult.success << std::endl;
+                     std::cout << "Did we store successfully: " << storageResult.isSuccess << std::endl;
                      return crow::response(200, "Successfully stored key");
 
                  } catch (const json::parse_error &e) {
@@ -39,9 +39,9 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
             ([=](const std::string table, const std::string key) {
 
                 auto fetchResult = storage->fetch(table, key);
-                std::cout << "Did we fetch successfully: " << fetchResult.success << std::endl;
+                std::cout << "Did we fetch successfully: " << fetchResult.isSuccess << std::endl;
 
-                if (fetchResult.success) {
+                if (fetchResult.isSuccess) {
                     return crow::response(200, fetchResult.getJson().dump());
                 } else {
                     return crow::response(404);

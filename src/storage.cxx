@@ -20,7 +20,7 @@ StoreResult Storage::store(std::string table, std::string key, std::unique_ptr<j
 
 FetchResult Storage::fetch(std::string table, std::string key) {
     if(this->tableMap.find(table) == this->tableMap.end()) {
-        return FetchResult(false);
+        return FetchResult::error();
     } else {
         return (this->tableMap)[table]->fetch(key);
     }

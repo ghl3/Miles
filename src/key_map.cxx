@@ -8,9 +8,9 @@
 
 FetchResult KeyMap::fetch(std::string key) {
     if(data.find(key) == data.end()) {
-        return FetchResult(false);
+        return FetchResult::error();
     } else {
-        return FetchResult(true, data[key]);
+        return FetchResult::success(data[key]);
     }
 }
 

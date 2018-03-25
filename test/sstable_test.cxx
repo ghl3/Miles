@@ -18,7 +18,7 @@ TEST(sstable_test, map_storage)
     auto keyMap = std::make_unique<KeyMap>();
     auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));
     auto storeResult = keyMap->store("foo", std::move(payload));
-    EXPECT_EQ(true, storeResult.success);
+    EXPECT_EQ(true, storeResult.isSuccess);
 
     TempDirectory tmpDir("/tmp/miles/ss_table_test_");
 
@@ -26,9 +26,9 @@ TEST(sstable_test, map_storage)
 
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
-    EXPECT_EQ(true, ssTable->fetch("foo").success);
+    EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
-    EXPECT_EQ(false, ssTable->fetch("bar").success);
+    EXPECT_EQ(false, ssTable->fetch("bar").isSuccess);
 
 }
 
@@ -52,9 +52,9 @@ TEST(sstable_test, many_keys)
 
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
-    EXPECT_EQ(true, ssTable->fetch("foo").success);
+    EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
-    EXPECT_EQ(true, ssTable->fetch("bar").success);
-    EXPECT_EQ(false, ssTable->fetch("fish").success);
+    EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
+    EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
 
 }

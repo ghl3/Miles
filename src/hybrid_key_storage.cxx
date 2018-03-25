@@ -15,15 +15,19 @@
 namespace fs = ::boost::filesystem;
 
 
+HybridKeyStorage::~HybridKeyStorage() {
+    this->saveInMemoryToDisk();
+    this->wal->clear();
+}
+
 StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> payload) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
-    wal->log(key, *payload);
-
     // If the key is already in the in-memory storage, we
-    //
+    // store it at the current location
     if (this->inMemoryStorage->containsKey(key)) {
+        wal->log(key, *payload);
         return this->inMemoryStorage->store(key, std::move(payload));
     }
 
@@ -31,12 +35,13 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
     // move it to disk and create a fresh in-memory storage
     if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
         std::cout << "Moving in-memory map to new SSTable" << std::endl;
-        this->moveInMemoryToDisk();
+        this->saveInMemoryToDisk();
         this->wal->clear();
         this->inMemoryStorage = std::make_unique<KeyMap>();
     }
 
     // Save the key to in-memory storage
+    wal->log(key, *payload);
     return this->inMemoryStorage->store(key, std::move(payload));
 }
 
@@ -47,24 +52,24 @@ FetchResult HybridKeyStorage::fetch(std::string key) {
 
     // First, check the in-memory storage
     auto inMemoryResult = this->inMemoryStorage->fetch(key);
-    if (inMemoryResult.success) {
+    if (inMemoryResult.isSuccess) {
         return inMemoryResult;
     } else {
 
         // Iterate in reverse order
         for(auto rit = diskStorage.rbegin(); rit != diskStorage.rend(); ++rit) {
             auto sstableResult = (*rit)->fetch(key);
-            if (sstableResult.success) {
+            if (sstableResult.isSuccess) {
                 return sstableResult;
             }
         }
 
-        return FetchResult(false);
+        return FetchResult::error(); //(false);
     }
 }
 
 
-bool HybridKeyStorage::moveInMemoryToDisk() {
+bool HybridKeyStorage::saveInMemoryToDisk() {
     std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
     auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
     this->diskStorage.push_back(std::move(newSSTable));
@@ -99,6 +104,7 @@ std::unique_ptr<HybridKeyStorage> HybridKeyStorage::buildFromDirectory(std::stri
 
     auto ptr = std::make_unique<HybridKeyStorage>(directory, maxInMemorySize);
 
+    // TODO: Ensure data files are returned in the right order (they appear to not be)
     for (const auto &path: HybridKeyStorage::getDataFiles(directory)) {
         ptr->diskStorage.push_back(SSTable::createFromFileName(path));
     }

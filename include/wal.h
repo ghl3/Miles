@@ -15,7 +15,7 @@ class Wal {
 
 public:
 
-    explicit Wal(const std::string &path) {
+    explicit Wal(const std::string &path) : path(path) {
         // Use a temporary stream to ensure hte
         // file exists if it hasn't yet been created
         auto tmpFile = std::ofstream(path, std::ios::app);
@@ -45,6 +45,8 @@ public:
 
 
 private:
+
+    const std::string path;
 
     std::fstream file;
 

@@ -10,6 +10,7 @@
 
 FetchResult SSTable::fetch(std::string key) {
 
+    this->file->clear();
     this->file->seekg(0);
     std::string lineKey;
     std::string linePayload;
@@ -18,11 +19,12 @@ FetchResult SSTable::fetch(std::string key) {
         std::getline(*file, linePayload);
 
         if (lineKey == key) {
-            return FetchResult(true, std::make_shared<json>(json::parse(linePayload)));
+            auto fr = FetchResult::success(std::make_shared<json>(json::parse(linePayload)));
+            return fr;
         }
     }
 
-    return FetchResult(false);
+    return FetchResult::error();
 }
 
 
@@ -45,7 +47,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string
 std::unique_ptr<SSTable> SSTable::createFromFileName(std::string fileName) {
 
     // Create a new file
-    auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc);
+    auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::ate);
 
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
 }

@@ -26,6 +26,8 @@ bool Wal::log(std::string key, const json& payload) {
 
 
 bool Wal::clear() {
+    auto tmp = std::fstream(path, std::fstream::in | std::fstream::out | std::fstream::trunc);
+    file = std::fstream(path, std::fstream::in | std::fstream::out | std::fstream::ate);
     return true;
 }
 
