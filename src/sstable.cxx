@@ -85,6 +85,13 @@ std::unique_ptr<SSTable> SSTable::createCompressedFromKeyMap(const KeyMap& km, s
     std::sort(begin(index), end(index), [](const auto& lhs, const auto& rhs) {return lhs.keyHash < rhs.keyHash;});
 
     for (auto idx: index) {
+
+        std::cout << "Writing"
+                  << " hash: " << idx.keyHash
+                  << " offset " << idx.offset
+                  << " length " << idx.length
+                                << std::endl;
+
         file->write(reinterpret_cast<char*>(&idx.keyHash), sizeof(idx.keyHash));
         file->write(reinterpret_cast<char*>(&idx.offset), sizeof(idx.offset));
         file->write(reinterpret_cast<char*>(&idx.length), sizeof(idx.length));
@@ -99,55 +106,41 @@ std::vector<IndexEntry> SSTable::buildIndex() {
 
     uint64_t numKeys;
 
+    // Read the metadata at the beginning of the file
     file->seekg(0);
     file->read(reinterpret_cast<char *>(&numKeys), sizeof(uint64_t));
+
+    // Find get the size and offset of the index
+    file->seekg(0, std::ios::end);
+    long long int fileSize = file->tellg();
 
     // 3 uint64_t entries per index
     // each uint64_t is 8 bytes
     // there are numKeys entries
     uint64_t indexSize = 3 * sizeof(uint64_t) * numKeys;
-
-    // Jump to the end of the file
-    file->seekg(0, std::ios::end);
-    long long int fileSize = file->tellg();
     uint64_t indexOffset = fileSize - indexSize;
 
-    std::cout << " Num Keys: " << numKeys
-              << " index size: " << indexSize
-              << " file size: " << fileSize
-              << " index offset: " << indexOffset
-              << std::endl;
+    // Jump to the start of the index and read it off,
+    // writing the results into a vector
+    std::vector<IndexEntry> index(numKeys);
+    file->seekg(indexOffset-1, std::ios::beg);
 
-    // The index consists of the last 3*sizeof(size_t)*numKeys of the file;
+    for (uint i = 0; i < numKeys; ++i) {
 
-    return std::vector<IndexEntry>();
-}
+        // TODO: We can write the index values directly into an array
+        // This will reduce copies when building the index
+        uint64_t hash;
+        file->read(reinterpret_cast<char *>(&hash), sizeof(uint64_t));
 
-/*
-std::string SSTable::buildStringIndex(std::vector<IndexEntry>& index) {
-    std::stringstream ss;
-    return ss.str();
-}
- */
+        uint64_t length;
+        file->read(reinterpret_cast<char *>(&length), sizeof(uint64_t));
 
+        uint64_t offset;
 
-/*
-std::vector<IndexEntry> SSTable::buildInMemoryIndex(const KeyMap &km) {
+        file->read(reinterpret_cast<char *>(&offset), sizeof(uint64_t));
 
-    std::vector<std::pair<std::string, std::string>> data;
-
-    for (auto keyValPair: km) {
-        size_t keyHash = std::hash<std::string>{}(keyValPair.first);
-        std::string compressedPayload = Zip::compress(keyValPair.second.dump());
-        data.push_back(std::make_pair(keyHash, compressedPayload));
+        index[i] = IndexEntry(hash, length, offset);
     }
 
-    std::sort(begin(data), end(data));
-
-    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
-
-
-    return std::vector<IndexEntry>();
+    return index;
 }
-
- \*/

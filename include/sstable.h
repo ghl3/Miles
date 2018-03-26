@@ -22,6 +22,19 @@ public:
             length(length)
     {;}
 
+    // TODO: Hide this constructor for better encapsulation
+    explicit IndexEntry(): keyHash(), offset(), length(), payload() {;}
+
+    bool operator==(const IndexEntry &other) const {
+        return other.keyHash==this->keyHash
+                && other.offset == this->offset
+                && other.length == this->length;
+    }
+
+    friend class SSTable;
+
+protected:
+
     uint64_t keyHash;
     uint64_t offset;
     uint64_t length;
