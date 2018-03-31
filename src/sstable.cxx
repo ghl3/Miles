@@ -36,7 +36,7 @@ FetchResult SSTable::fetch(std::string key) {
 
 FetchResult<json> SSTable::fetch(std::string key) {
 
-    auto indexSearchResult = this->findInIndex(key);
+    //auto indexSearchResult = this->findInIndex(key);
 
     this->file->clear();
     this->file->seekg(0);
@@ -56,11 +56,11 @@ FetchResult<json> SSTable::fetch(std::string key) {
 }
 
 
-
+/*
 FetchResult<IndexEntry> SSTable::findInIndex(std::string key) {
     return FetchResult<IndexEntry>::error();
 }
-
+*/
 
 std::vector<IndexEntry> SSTable::buildIndex() {
 
@@ -106,7 +106,22 @@ std::vector<IndexEntry> SSTable::buildIndex() {
 }
 
 
+std::unique_ptr<json> SSTable::getData(IndexEntry idx) {
+    file->seekg(idx.offset);
+    std::string dataCompressed(idx.length, '\0');
+    file->read(&dataCompressed[0], static_cast<std::streamsize>(idx.length));
 
+    auto dataUncompressed = dataCompressed; //Zip::decompress(dataCompressed);
+
+    //char buffer[idx.length];
+    //file->read(buffer, static_cast<std::streamsize>(idx.length));
+    //Zip::decompress  (keyValPair.second->dump()).c_str();
+
+    return std::make_unique<json>(json::parse(dataUncompressed));
+}
+
+
+/*
 std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
 
     // Create a new file
@@ -117,58 +132,69 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string
         *file << keyValPair.second->dump() << std::endl;
     }
 
-    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), km.size())};
 
 }
+*/
 
-
-std::unique_ptr<SSTable> SSTable::createFromFileName(std::string fileName) {
+std::unique_ptr<SSTable> SSTable::createFromFileName(const std::string& fileName) {
 
     // Create a new file
     auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::ate);
 
-    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+    // Get the number of keys from the metadata at the beginning of the file
+    Metadata metadata;
+    file->seekg(0);
+    file->read(reinterpret_cast<char *>(&metadata), sizeof(Metadata));
+
+    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)};
 }
 
 
-std::unique_ptr<SSTable> SSTable::createCompressedFromKeyMap(const KeyMap& km, std::string fileName) {
+std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
 
     // Create a new file
     auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc | std::fstream::binary);
 
+    // Start at the beginning of the file
+    file->seekp(0);
+
+    // Leave a blank space for the metadata
+    // by skipping ahead the memory size
+    file->seekp(sizeof(Metadata), file->beg);
+
     // Add the header/metadata to the file
     // For now, this only consists of an initial integer
     // that represents the number of bits
-    uint64_t numKeys = static_cast<uint64_t>(km.size());
-    file->write(reinterpret_cast<char*>(&numKeys), sizeof(uint64_t));
+    //auto numKeys = static_cast<uint64_t>(km.size());
+    //file->write(reinterpret_cast<char*>(&numKeys), sizeof(uint64_t));
+
+    //auto dataOffset = static_cast<uint64_t>(file->tellg());
 
     // Then, write each value to the file and maintain an index
     // for each entry
-    uint64_t offsetInBytes = sizeof(numKeys);
+    uint64_t currentOffset = sizeof(Metadata);
     std::vector<IndexEntry> index;
 
     for (auto keyValPair: km) {
 
         uint64_t keyHash = std::hash<std::string>{}(keyValPair.first);
-        const char* compressedPayload = Zip::compress(keyValPair.second->dump()).c_str();
+        std::string compressedPayload = keyValPair.second->dump(); //Zip::compress(keyValPair.second->dump()); //.c_str();
 
-        uint64_t sizeInBytes = sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
-        index.emplace_back(IndexEntry(keyHash, offsetInBytes, sizeInBytes));
-        offsetInBytes += sizeInBytes;
+        uint64_t sizeInBytes = compressedPayload.size() * sizeof(char); //sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
+        index.emplace_back(IndexEntry(keyHash, currentOffset, sizeInBytes));
+        currentOffset += sizeInBytes;
 
-        file->write(reinterpret_cast<char*>(&compressedPayload), sizeof(compressedPayload));
+        file->write(reinterpret_cast<char*>(&compressedPayload[0]), compressedPayload.size() * sizeof(char));
     }
+
+    // Now that we've written all of the data, write the index
+    // Mark the location of the start of the index
+    auto indexOffset = static_cast<uint64_t>(file->tellg());
 
     std::sort(begin(index), end(index), [](const auto& lhs, const auto& rhs) {return lhs.keyHash < rhs.keyHash;});
 
     for (auto idx: index) {
-
-        std::cout << "Writing"
-                  << " hash: " << idx.keyHash
-                  << " offset " << idx.offset
-                  << " length " << idx.length
-                                << std::endl;
-
         file->write(reinterpret_cast<char*>(&idx.keyHash), sizeof(idx.keyHash));
         file->write(reinterpret_cast<char*>(&idx.offset), sizeof(idx.offset));
         file->write(reinterpret_cast<char*>(&idx.length), sizeof(idx.length));
@@ -176,5 +202,16 @@ std::unique_ptr<SSTable> SSTable::createCompressedFromKeyMap(const KeyMap& km, s
 
     *file << std::endl;
 
-    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file))};
+    // Finally, write the metadata to the beginning of the file
+    auto metadata = Metadata(km.size(), indexOffset);
+    file->seekp(0);
+    file->write(reinterpret_cast<char*>(&metadata), sizeof(Metadata));
+
+    return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)}; //km.size(), dataOffset, indexOffset)};
 }
+
+/*
+IndexEntry SSTable::getIndexEntry(int i) {
+
+}
+*/

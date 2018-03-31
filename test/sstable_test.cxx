@@ -13,6 +13,7 @@ using json = nlohmann::json;
 
 
 
+/*
 TEST(sstable_test, map_storage)
 {
     auto keyMap = std::make_unique<KeyMap>();
@@ -58,7 +59,7 @@ TEST(sstable_test, many_keys)
 
 }
 
-
+*/
 
 
 TEST(sstable_test, index_test)
@@ -74,19 +75,26 @@ TEST(sstable_test, index_test)
     TempDirectory tmpDir("/tmp/miles/ss_table_compressed_test_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
 
-    auto ssTable = SSTable::createCompressedFromKeyMap(*keyMap, fname);
+    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
     auto idx = ssTable->buildIndex();
 
     std::vector<IndexEntry> expected = {
-            IndexEntry(658648847097844546, 8, 8),
-            IndexEntry(910203208414753533, 16, 8)
+            IndexEntry(658648847097844546, 16, 19),
+            IndexEntry(910203208414753533, 35, 19)
     };
 
     EXPECT_EQ(idx.size(), expected.size());
     for (uint i=0; i < idx.size(); ++i) {
         EXPECT_EQ(idx[i], expected[i]);
     }
+
+    auto json = *(ssTable->getData(idx.at(0)));
+
+    std::cout << json.dump() << std::endl;
+    std::cout << json::array({{"a", 10}, {"b", 20}}) << std::endl;
+
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}),  *(ssTable->getData(idx.at(0))));
 
     std::cout << "Done" << std::endl;
 

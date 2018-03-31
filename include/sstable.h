@@ -25,7 +25,7 @@ public:
     {;}
 
     // TODO: Hide this constructor for better encapsulation
-    explicit IndexEntry(): keyHash(), offset(), length(), payload() {;}
+    explicit IndexEntry(): keyHash(), offset(), length() {;}
 
     bool operator==(const IndexEntry &other) const {
         return other.keyHash==this->keyHash
@@ -40,8 +40,26 @@ protected:
     uint64_t keyHash;
     uint64_t offset;
     uint64_t length;
-    std::string payload;
+};
 
+
+class Metadata {
+
+public:
+
+    explicit Metadata(): numKeys(0), indexOffset(0) {;}
+
+    explicit Metadata(uint64_t numKeys, uint64_t indexOffset): numKeys(numKeys), indexOffset(indexOffset) {;}
+
+    inline uint64_t getDataStart() { return sizeof(Metadata); }
+    inline uint64_t getIndexStart() { return indexOffset; }
+
+    inline uint64_t getDataSize() { return getIndexStart() - getDataStart(); }
+    inline uint64_t getIndexSize() { return 3 * sizeof(uint64_t) * numKeys; }
+
+private:
+    uint64_t numKeys;
+    uint64_t indexOffset;
 };
 
 
@@ -83,25 +101,46 @@ public:
 
     FetchResult<json> fetch(std::string key) override;
 
-    FetchResult<IndexEntry> findInIndex(std::string key);
+    //FetchResult<IndexEntry> findInIndex(const std::string& key);
 
     std::vector<IndexEntry> buildIndex();
 
     static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
-    static std::unique_ptr<SSTable> createCompressedFromKeyMap(const KeyMap& km, std::string fileName);
+    //static std::unique_ptr<SSTable> createCompressedFromKeyMap(const KeyMap& km, std::string fileName);
 
-    static std::unique_ptr<SSTable> createFromFileName(std::string fileName);
+    static std::unique_ptr<SSTable> createFromFileName(const std::string& fileName);
+
+    std::unique_ptr<json> getData(IndexEntry idx);
+
 
 private:
 
-    explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file):
+    //IndexEntry getIndexEntry(int i);
+
+    // Hard-code metadata size to 8 bytes (1 int)
+    // TODO: Make this dynamic, based on metadata size
+    //inline uint64_t getIndexStart() { return 1 * sizeof(uint64_t); }
+    //inline uint64_t getIndexSize() { return  3 * sizeof(uint64_t) * this; }
+    //inline uint64_t getIndexEnd() { return getIndexStart() + getIndexSize(); }
+
+    explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file, Metadata metadata) :
+                     //uint64_t numEntries,  uint64_t dataOffset,  uint64_t indexOffset):
             fileName(std::move(fileName)),
-            file(std::move(file)) {;}
+            file(std::move(file)),
+            metadata(metadata)
+            {;}
+
 
     const std::string fileName;
 
     std::unique_ptr<std::fstream> file;
+
+    const Metadata metadata;
+
+    //const uint64_t numEntries;
+    //const uint64_t dataOffset;
+    //const uint64_t indexOffset;
 
 };
 
