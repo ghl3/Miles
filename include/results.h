@@ -7,7 +7,7 @@
 
 #include "json.h"
 
-using json = nlohmann::json;
+//using json = nlohmann::json;
 
 
 class StoreResult {
@@ -19,36 +19,36 @@ public:
 
 };
 
-
+template <class T>
 class FetchResult {
 
 public:
 
     //explicit FetchResult(bool r) : success(r), payload(nullptr) {;}
 
-    FetchResult(const FetchResult& that): isSuccess(that.isSuccess), payload(that.payload) {
+    FetchResult(FetchResult<T>&& that) noexcept: isSuccess(that.isSuccess), payload(that.payload.release()) {
       ;
     }
 
-    static FetchResult success(const std::shared_ptr<json>& j) {
-        return FetchResult(true, j);
+    static FetchResult<T> success(std::unique_ptr<T> p) {
+        return FetchResult(true, std::move(p));
     }
 
-    static FetchResult error() {
+    static FetchResult<T> error() {
         return FetchResult(false, nullptr);
     }
 
     const bool isSuccess;
 
-    const json& getJson() {
+    const T& getPayload() {
         return *payload;
     }
 
 private:
 
-    explicit FetchResult(bool s, const std::shared_ptr<json>& j) : isSuccess(s), payload(j) {;}
+    explicit FetchResult(bool s, std::unique_ptr<T> p) : isSuccess(s), payload(p.release()) {;}
 
-    const std::shared_ptr<const json> payload;
+    std::unique_ptr<const T> payload;
 
 };
 

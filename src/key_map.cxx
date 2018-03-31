@@ -2,15 +2,18 @@
 // Created by George on 3/16/18.
 //
 
+
+#include <memory>
+
 #include <results.h>
 #include <key_map.h>
 
 
-FetchResult KeyMap::fetch(std::string key) {
+FetchResult<json> KeyMap::fetch(std::string key) {
     if(data.find(key) == data.end()) {
-        return FetchResult::error();
+        return FetchResult<json>::error();
     } else {
-        return FetchResult::success(data[key]);
+        return FetchResult<json>::success(std::make_unique<json>(*data[key]));
     }
 }
 

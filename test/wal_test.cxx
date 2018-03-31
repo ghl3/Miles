@@ -28,5 +28,5 @@ TEST(wal_test, foo)
     auto walAndKeyMap = Wal::buildKeyMapAndWall(walPath);
     auto keyMap = std::move(walAndKeyMap.second);
 
-    EXPECT_EQ(json({{"a", 10}}), keyMap->fetch("foo").getJson());
+    EXPECT_EQ(json({{"a", 10}}), keyMap->fetch("foo").getPayload());
 }

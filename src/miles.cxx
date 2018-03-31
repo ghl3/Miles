@@ -42,7 +42,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
                 std::cout << "Did we fetch successfully: " << fetchResult.isSuccess << std::endl;
 
                 if (fetchResult.isSuccess) {
-                    return crow::response(200, fetchResult.getJson().dump());
+                    return crow::response(200, fetchResult.getPayload().dump());
                 } else {
                     return crow::response(404);
                 }

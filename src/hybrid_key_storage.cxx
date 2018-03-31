@@ -46,7 +46,7 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
 }
 
 
-FetchResult HybridKeyStorage::fetch(std::string key) {
+FetchResult<json> HybridKeyStorage::fetch(std::string key) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
@@ -64,7 +64,7 @@ FetchResult HybridKeyStorage::fetch(std::string key) {
             }
         }
 
-        return FetchResult::error(); //(false);
+        return FetchResult<json>::error();
     }
 }
 

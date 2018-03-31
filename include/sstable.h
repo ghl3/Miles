@@ -11,6 +11,8 @@
 #include "key_storage.h"
 #include "key_map.h"
 
+using json = nlohmann::json;
+
 
 class IndexEntry {
 
@@ -75,11 +77,13 @@ protected:
  * to JSON on the way out).
  *
  */
-class SSTable: public IKeyStorage {
+class SSTable: public IKeyStorage<json> {
 
 public:
 
-    FetchResult fetch(std::string key) override;
+    FetchResult<json> fetch(std::string key) override;
+
+    FetchResult<IndexEntry> findInIndex(std::string key);
 
     std::vector<IndexEntry> buildIndex();
 

@@ -18,9 +18,9 @@ StoreResult Storage::store(std::string table, std::string key, std::unique_ptr<j
     return (this->tableMap)[table]->store(key, std::move(payload));
 }
 
-FetchResult Storage::fetch(std::string table, std::string key) {
+FetchResult<json> Storage::fetch(std::string table, std::string key) {
     if(this->tableMap.find(table) == this->tableMap.end()) {
-        return FetchResult::error();
+        return FetchResult<json>::error();
     } else {
         return (this->tableMap)[table]->fetch(key);
     }

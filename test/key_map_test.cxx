@@ -22,7 +22,7 @@ TEST(key_map_test, map_storage)
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getJson());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getPayload());
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
 

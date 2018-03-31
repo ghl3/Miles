@@ -8,6 +8,7 @@
 
 #include "results.h"
 
+template <class T>
 class IKeyStorage {
 
 public:
@@ -18,8 +19,7 @@ public:
     IKeyStorage(IKeyStorage const &) = delete;
     void operator=(IKeyStorage const &x) = delete;
 
-    //virtual StoreResult store(std::string, std::unique_ptr<json>)=0;
-    virtual FetchResult fetch(std::string)=0;
+    virtual FetchResult<T> fetch(std::string)=0;
 };
 
 

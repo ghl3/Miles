@@ -32,7 +32,7 @@ TEST(hybrid_key_storage, store_and_fetch)
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getJson());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getPayload());
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
 }
@@ -89,14 +89,14 @@ TEST(hybrid_key_storage, reload_from_file)
 
     auto storage = HybridKeyStorage::buildFromDirectory(tmpDir.getPath(), 2);
 
-    EXPECT_EQ(json::array({{"x", 10}, {"y", 20}}), storage->fetch("a").getJson());
-    EXPECT_EQ(json::array({{"x", 20}, {"y", 40}}), storage->fetch("b").getJson());
+    EXPECT_EQ(json::array({{"x", 10}, {"y", 20}}), storage->fetch("a").getPayload());
+    EXPECT_EQ(json::array({{"x", 20}, {"y", 40}}), storage->fetch("b").getPayload());
 
     auto CTHING = storage->fetch("c");
 
-    EXPECT_EQ(json::array({{"x", 40}, {"y", 80}}), CTHING.getJson());
-    EXPECT_EQ(json::array({{"x", 30}, {"y", 60}}), storage->fetch("d").getJson());
-    EXPECT_EQ(json::array({{"x", 50}, {"y", 100}}), storage->fetch("e").getJson());
+    EXPECT_EQ(json::array({{"x", 40}, {"y", 80}}), CTHING.getPayload());
+    EXPECT_EQ(json::array({{"x", 30}, {"y", 60}}), storage->fetch("d").getPayload());
+    EXPECT_EQ(json::array({{"x", 50}, {"y", 100}}), storage->fetch("e").getPayload());
 
     std::cout << "Foo" << std::endl;
 

@@ -27,7 +27,7 @@ TEST(sstable_test, map_storage)
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
     EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getPayload());
     EXPECT_EQ(false, ssTable->fetch("bar").isSuccess);
 
 }
@@ -52,7 +52,7 @@ TEST(sstable_test, many_keys)
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
     EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getJson());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getPayload());
     EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
     EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
 

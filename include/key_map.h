@@ -10,13 +10,16 @@
 #include "results.h"
 #include "key_storage.h"
 
-class KeyMap: public IKeyStorage {
+using json = nlohmann::json;
+
+
+class KeyMap: public IKeyStorage<json> {
 
 public:
 
     explicit KeyMap() {;}
 
-    FetchResult fetch(std::string key) override;
+    FetchResult<json> fetch(std::string key) override;
 
     StoreResult store(std::string key, std::unique_ptr<json> payload);
 

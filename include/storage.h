@@ -30,7 +30,7 @@ public:
 
     StoreResult store(std::string table, std::string key,  std::unique_ptr<json> payload);
 
-    FetchResult fetch(std::string table, std::string key);
+    FetchResult<json> fetch(std::string table, std::string key);
 
 private:
 
