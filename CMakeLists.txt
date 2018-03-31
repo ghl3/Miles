@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.9)
+cmake_minimum_required (VERSION 2.8.11)
 project (Miles)
 
 set(CMAKE_BUILD_TYPE Debug)
@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 get_filename_component(DEPS_ROOT "${PROJECT_BINARY_DIR}/deps" ABSOLUTE)
 
-include(ExtProjectUtils)
+#include(ExtProjectUtils)
 
 # Will download external CMakeable project from git repo, branch "master" and install it in $DEPS_ROOT
 # This also will create "googletest.git" target, which we'll use as dependency for our test project
@@ -59,9 +59,9 @@ target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRAR
 # Configure google test
 #
 
-#add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
-#                 ${CMAKE_SOURCE_DIR}/modules/googletest
-#                 EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
+                 ${CMAKE_SOURCE_DIR}/modules/googletest
+                 EXCLUDE_FROM_ALL)
 
 
 #-------------------
