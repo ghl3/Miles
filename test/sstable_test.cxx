@@ -13,7 +13,7 @@ using json = nlohmann::json;
 
 
 
-/*
+
 TEST(sstable_test, map_storage)
 {
     auto keyMap = std::make_unique<KeyMap>();
@@ -59,8 +59,6 @@ TEST(sstable_test, many_keys)
 
 }
 
-*/
-
 
 TEST(sstable_test, index_test)
 {
@@ -80,8 +78,8 @@ TEST(sstable_test, index_test)
     auto idx = ssTable->buildIndex();
 
     std::vector<IndexEntry> expected = {
-            IndexEntry(658648847097844546, 16, 19),
-            IndexEntry(910203208414753533, 35, 19)
+            IndexEntry(658648847097844546, 24, 19),
+            IndexEntry(910203208414753533, 43, 19)
     };
 
     EXPECT_EQ(idx.size(), expected.size());
@@ -92,7 +90,5 @@ TEST(sstable_test, index_test)
     auto json = *(ssTable->getData(idx.at(0)));
 
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}),  json);
-
-    std::cout << "Done" << std::endl;
 
 }

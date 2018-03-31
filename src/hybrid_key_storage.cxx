@@ -73,7 +73,6 @@ bool HybridKeyStorage::saveInMemoryToDisk() {
     std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
     auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
     this->diskStorage.push_back(std::move(newSSTable));
-    std::cout << "Created new SSTable " << fileName << std::endl;
     return true;
 }
 

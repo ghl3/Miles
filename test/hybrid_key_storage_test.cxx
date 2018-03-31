@@ -53,19 +53,14 @@ TEST(hybrid_key_storage, move_to_disk)
     storage->store("z", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
 
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
+    EXPECT_EQ(true, storage->fetch("a").isSuccess);
+    EXPECT_EQ(true, storage->fetch("z").isSuccess);
 
-    std::string dataFile0 = fileToString(tmpDir.getPath() + "/table_0.dat");
-    EXPECT_EQ(dataFile0, "a\n"
-                         "[[\"a\",10],[\"b\",20]]\n"
-                         "b\n"
-                         "[[\"a\",10],[\"b\",20]]\n");
+    // Assert that we created 2 on-disk sstable files
+    ASSERT_TRUE(boost::filesystem::exists(tmpDir.getPath() + "/table_0.dat"));
+    ASSERT_TRUE(boost::filesystem::exists(tmpDir.getPath() + "/table_1.dat"));
 
-    std::string dataFile1 = fileToString(tmpDir.getPath() + "/table_1.dat");
-    EXPECT_EQ(dataFile1, "c\n"
-                         "[[\"a\",10],[\"b\",20]]\n"
-                         "d\n"
-                         "[[\"a\",10],[\"b\",20]]\n");
-
+    // Assert that we created a WAL and its current contents are what we expect
     std::string walFile = fileToString(tmpDir.getPath() + "/wal.log");
     EXPECT_EQ(walFile, "z\n"
                        "[[\"a\",10],[\"b\",20]]\n");
@@ -97,8 +92,5 @@ TEST(hybrid_key_storage, reload_from_file)
     EXPECT_EQ(json::array({{"x", 40}, {"y", 80}}), CTHING.getPayload());
     EXPECT_EQ(json::array({{"x", 30}, {"y", 60}}), storage->fetch("d").getPayload());
     EXPECT_EQ(json::array({{"x", 50}, {"y", 100}}), storage->fetch("e").getPayload());
-
-    std::cout << "Foo" << std::endl;
-
 
 }
