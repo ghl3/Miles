@@ -18,14 +18,15 @@ class IndexEntry {
 
 public:
 
-    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length):
+    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length, bool compressed=false):
             keyHash(keyHash),
             offset(offset),
-            length(length)
+            length(length),
+            compressed(compressed)
     {;}
 
     // TODO: Hide this constructor for better encapsulation
-    explicit IndexEntry(): keyHash(), offset(), length() {;}
+    explicit IndexEntry(): keyHash(), offset(), length(), compressed(false) {;}
 
     bool operator==(const IndexEntry &other) const {
         return other.keyHash==this->keyHash
@@ -40,6 +41,7 @@ protected:
     uint64_t keyHash;
     uint64_t offset;
     uint64_t length;
+    bool compressed;
 };
 
 

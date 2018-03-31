@@ -91,10 +91,7 @@ TEST(sstable_test, index_test)
 
     auto json = *(ssTable->getData(idx.at(0)));
 
-    std::cout << json.dump() << std::endl;
-    std::cout << json::array({{"a", 10}, {"b", 20}}) << std::endl;
-
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}),  *(ssTable->getData(idx.at(0))));
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}),  json);
 
     std::cout << "Done" << std::endl;
 

@@ -108,16 +108,20 @@ std::vector<IndexEntry> SSTable::buildIndex() {
 
 std::unique_ptr<json> SSTable::getData(IndexEntry idx) {
     file->seekg(idx.offset);
-    std::string dataCompressed(idx.length, '\0');
-    file->read(&dataCompressed[0], static_cast<std::streamsize>(idx.length));
+    std::string data(idx.length, '\0');
+    file->read(&data[0], static_cast<std::streamsize>(idx.length));
 
-    auto dataUncompressed = dataCompressed; //Zip::decompress(dataCompressed);
+    if (idx.compressed) {
+        return std::make_unique<json>(json::parse(Zip::decompress(data)));
+    } else {
+        return std::make_unique<json>(json::parse(data));
+    }
+
+//    auto dataUncompressed = ; //dataCompressed; //Zip::decompress(dataCompressed);
 
     //char buffer[idx.length];
     //file->read(buffer, static_cast<std::streamsize>(idx.length));
     //Zip::decompress  (keyValPair.second->dump()).c_str();
-
-    return std::make_unique<json>(json::parse(dataUncompressed));
 }
 
 
@@ -150,6 +154,7 @@ std::unique_ptr<SSTable> SSTable::createFromFileName(const std::string& fileName
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)};
 }
 
+size_t COMPRESSION_THRESHOLD = 1024;
 
 std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string fileName) {
 
@@ -179,13 +184,21 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string
     for (auto keyValPair: km) {
 
         uint64_t keyHash = std::hash<std::string>{}(keyValPair.first);
-        std::string compressedPayload = keyValPair.second->dump(); //Zip::compress(keyValPair.second->dump()); //.c_str();
 
-        uint64_t sizeInBytes = compressedPayload.size() * sizeof(char); //sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
-        index.emplace_back(IndexEntry(keyHash, currentOffset, sizeInBytes));
+        std::string payload = keyValPair.second->dump();
+
+        bool compress = (payload.size() > COMPRESSION_THRESHOLD);
+        if (compress) {
+          payload = Zip::compress(payload);
+        }
+
+        //std::string compressedPayload = Zip::compress(); //keyValPair.second->dump(); //Zip::compress(keyValPair.second->dump()); //.c_str();
+
+        uint64_t sizeInBytes = payload.size() * sizeof(char); //sizeof(compressedPayload) ; //compressedPayload.size() * sizeof(char);
+        index.emplace_back(IndexEntry(keyHash, currentOffset, sizeInBytes, compress));
         currentOffset += sizeInBytes;
 
-        file->write(reinterpret_cast<char*>(&compressedPayload[0]), compressedPayload.size() * sizeof(char));
+        file->write(reinterpret_cast<char*>(&payload[0]), payload.size() * sizeof(char));
     }
 
     // Now that we've written all of the data, write the index
