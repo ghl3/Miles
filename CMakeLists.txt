@@ -13,7 +13,7 @@ include(ExtProjectUtils)
 
 # Will download external CMakeable project from git repo, branch "master" and install it in $DEPS_ROOT
 # This also will create "googletest.git" target, which we'll use as dependency for our test project
-ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
+#ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
 
 #-------------------
 # set common include folder for module
@@ -54,12 +54,24 @@ add_executable(miles src/miles.cxx ${SRC_FILES} include/sstable.h include/key_st
 
 target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})
 
+
+#
+# Configure google test
+#
+
+#add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
+#                 ${CMAKE_SOURCE_DIR}/modules/googletest
+#                 EXCLUDE_FROM_ALL)
+
+
 #-------------------
 # Test
 #-------------------
 enable_testing()
 
-file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*_test.cxx)
+file(GLOB TEST_SRC_FILES ${CMAKE_SOURCE_DIR}/test/*_test.cxx)
+
+include_directories(include)
 
 add_executable(testall test/all.cxx ${TEST_SRC_FILES} src/storage.cxx src/utils.cxx include/sstable.h src/sstable.cxx include/hybrid_key_storage.h src/hybrid_key_storage.cxx src/key_map.cxx src/wal.cxx test/wal_test.cxx)
 add_dependencies(testall "googletest.git")
