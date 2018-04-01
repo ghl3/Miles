@@ -11,7 +11,7 @@
 using json = nlohmann::json;
 
 
-TEST(wal_test, foo)
+TEST(wal_test, build)
 {
 
     utils::TempDirectory tmpDir("/tmp/miles/wal_test_");
@@ -20,8 +20,8 @@ TEST(wal_test, foo)
 
     // Create a WAL file and write data to it
     auto wal = Wal(walPath);
-    wal.log("foo", json({{"a", 10}}));
-    wal.log("bar", json({{"b", 20}}));
+    wal.logJson("foo", json({{"a", 10}}));
+    wal.logJson("bar", json({{"b", 20}}));
 
     // Convert the WAL file to an in-memory map
     // and ensure the data is consistent

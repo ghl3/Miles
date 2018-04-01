@@ -26,7 +26,7 @@ public:
 
     bool log(const std::string& key, const std::vector<char>& payload);
 
-    bool log(const std::string& key, const json& payload);
+    bool logJson(const std::string& key, const json& payload);
 
     bool clear();
 

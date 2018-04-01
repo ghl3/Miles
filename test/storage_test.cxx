@@ -21,10 +21,10 @@ TEST(storage_test, map_storage)
     EXPECT_EQ(false, storage->fetch("foo", "bar").isSuccess);
 
     auto payload = json::array({{"a", 10}, {"b", 20}});
-    auto storeResult = storage->store("foo", "bar", payload);
+    auto storeResult = storage->storeJson("foo", "bar", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo", "bar").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo", "bar").getPayload());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo", "bar").getAsJson());
 
 }

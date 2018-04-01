@@ -38,3 +38,11 @@ std::string utils::charVectorToString(const std::vector<char>& data) {
     std::string result(data.begin(), data.end());
     return result;
 }
+
+
+
+std::vector<char> utils::jsonToCharVector(const json& data) {
+    return utils::stringToCharVector(data.dump());
+    //std::string result(data.begin(), data.end());
+    //return result;
+}

@@ -15,6 +15,11 @@
 #include "gsl.h"
 
 
+#include "json.h"
+
+using json = nlohmann::json;
+
+
 namespace utils {
 
     std::string generateRandomId(size_t length = 0);
@@ -44,6 +49,9 @@ namespace utils {
     std::vector<char> stringToCharVector(const std::string& s);
 
     std::string charVectorToString(const std::vector<char>& data);
+
+    std::vector<char> jsonToCharVector(const json& json);
+
 
 }
 

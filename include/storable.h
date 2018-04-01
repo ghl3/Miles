@@ -22,12 +22,14 @@ public:
 
     virtual StoreResult store(const std::string& key, std::vector<char>&&)=0;
 
+    /*
     StoreResult store(const std::string& key, const std::string& payload) {
-        return IStorable::store(key, utils::stringToCharVector(payload));
+        return store(key, utils::stringToCharVector(payload));
     }
+     */
 
-    StoreResult store(const std::string& key, const json& payload) {
-        return IStorable::store(key, utils::stringToCharVector(payload.dump()));
+    StoreResult storeJson(const std::string& key, const json& payload) {
+        return store(key, utils::jsonToCharVector(payload));
     }
 
 };

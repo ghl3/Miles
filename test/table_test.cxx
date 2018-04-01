@@ -19,7 +19,7 @@ std::string fileToString(const std::string &fileName) {
 }
 
 
-TEST(hybrid_key_storage, store_and_fetch)
+TEST(table, store_and_fetch)
 {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
@@ -28,17 +28,17 @@ TEST(hybrid_key_storage, store_and_fetch)
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
     auto payload = json::array({{"a", 10}, {"b", 20}});
-    auto storeResult = storage->store("foo", payload);
+    auto storeResult = storage->storeJson("foo", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo").isSuccess);
-    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getPayload());
+    EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getAsJson());
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
 }
 
 
-TEST(hybrid_key_storage, move_to_disk)
+TEST(table, move_to_disk)
 {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
@@ -46,11 +46,11 @@ TEST(hybrid_key_storage, move_to_disk)
     auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
-    storage->store("a", json::array({{"a", 10}, {"b", 20}}));
-    storage->store("b", json::array({{"a", 10}, {"b", 20}}));
-    storage->store("d", json::array({{"a", 10}, {"b", 20}}));
-    storage->store("c", json::array({{"a", 10}, {"b", 20}}));
-    storage->store("z", json::array({{"a", 10}, {"b", 20}}));
+    storage->storeJson("a", json::array({{"a", 10}, {"b", 20}}));
+    storage->storeJson("b", json::array({{"a", 10}, {"b", 20}}));
+    storage->storeJson("d", json::array({{"a", 10}, {"b", 20}}));
+    storage->storeJson("c", json::array({{"a", 10}, {"b", 20}}));
+    storage->storeJson("z", json::array({{"a", 10}, {"b", 20}}));
 
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
     EXPECT_EQ(true, storage->fetch("a").isSuccess);
@@ -68,29 +68,26 @@ TEST(hybrid_key_storage, move_to_disk)
 }
 
 
-TEST(hybrid_key_storage, reload_from_file)
+TEST(table, reload_from_file)
 {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
 
     {
         auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
-        storage->store("a", json::array({{"x", 10}, {"y", 20}}));
-        storage->store("b", json::array({{"x", 20}, {"y", 40}}));
-        storage->store("d", json::array({{"x", 30}, {"y", 60}}));
-        storage->store("c", json::array({{"x", 40}, {"y", 80}}));
-        storage->store("e", json::array({{"x", 50}, {"y", 100}}));
+        storage->storeJson("a", json::array({{"x", 10}, {"y", 20}}));
+        storage->storeJson("b", json::array({{"x", 20}, {"y", 40}}));
+        storage->storeJson("d", json::array({{"x", 30}, {"y", 60}}));
+        storage->storeJson("c", json::array({{"x", 40}, {"y", 80}}));
+        storage->storeJson("e", json::array({{"x", 50}, {"y", 100}}));
     }
 
     auto storage = Table::buildFromDirectory(tmpDir.getPath(), 2);
 
-    EXPECT_EQ(json::array({{"x", 10}, {"y", 20}}), storage->fetch("a").getPayload());
-    EXPECT_EQ(json::array({{"x", 20}, {"y", 40}}), storage->fetch("b").getPayload());
-
-    auto CTHING = storage->fetch("c");
-
-    EXPECT_EQ(json::array({{"x", 40}, {"y", 80}}), CTHING.getPayload());
-    EXPECT_EQ(json::array({{"x", 30}, {"y", 60}}), storage->fetch("d").getPayload());
-    EXPECT_EQ(json::array({{"x", 50}, {"y", 100}}), storage->fetch("e").getPayload());
+    EXPECT_EQ(json::array({{"x", 10}, {"y", 20}}), storage->fetch("a").getAsJson());
+    EXPECT_EQ(json::array({{"x", 20}, {"y", 40}}), storage->fetch("b").getAsJson());
+    EXPECT_EQ(json::array({{"x", 40}, {"y", 80}}), storage->fetch("c").getAsJson());
+    EXPECT_EQ(json::array({{"x", 30}, {"y", 60}}), storage->fetch("d").getAsJson());
+    EXPECT_EQ(json::array({{"x", 50}, {"y", 100}}), storage->fetch("e").getAsJson());
 
 }

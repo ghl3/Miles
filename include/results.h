@@ -48,7 +48,7 @@ public:
         return result;
     }
 
-    const std::string getAsJson() {
+    const json getAsJson() {
         return json::parse(getAsString());
     }
 
