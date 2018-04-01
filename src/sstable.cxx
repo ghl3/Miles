@@ -9,11 +9,11 @@
 #include <zip.h>
 #include <iostream>
 
-using json = nlohmann::json;
+//using json = nlohmann::json;
 
 
 
-FetchResult<json> SSTable::fetch(std::string key) {
+FetchResult SSTable::fetch(const std::string& key) {
 
     uint64_t keyHash = SSTable::hashKey(key);
 
@@ -23,11 +23,11 @@ FetchResult<json> SSTable::fetch(std::string key) {
     // TODO: Do a faster search here
     for (IndexEntry idx: index) {
         if (idx.keyHash == keyHash) {
-            return FetchResult<json>::success(this->getData(idx));
+            return this->getData(idx);
         }
     }
 
-    return FetchResult<json>::error();
+    return FetchResult::error();
 }
 
 
@@ -75,7 +75,7 @@ std::vector<IndexEntry> SSTable::buildIndex() {
 }
 
 
-std::unique_ptr<json> SSTable::getData(IndexEntry idx) {
+FetchResult SSTable::getData(IndexEntry idx) {
     file->seekg(idx.offset);
     std::string data(idx.length, '\0');
     file->read(&data[0], static_cast<std::streamsize>(idx.length));
@@ -84,7 +84,7 @@ std::unique_ptr<json> SSTable::getData(IndexEntry idx) {
         data = Zip::decompress(data);
     }
 
-    return std::make_unique<json>(json::parse(data));
+    return FetchResult::success(utils::stringToCharVector(data));
 }
 
 
@@ -130,7 +130,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap& km, std::string
 
         uint64_t keyHash = SSTable::hashKey(keyValPair.first);
 
-        std::string payload = keyValPair.second->dump();
+        std::string payload = utils::charVectorToString(keyValPair.second);
 
         bool compress = (payload.size() > COMPRESSION_THRESHOLD);
         if (compress) {

@@ -9,19 +9,22 @@
 #include <key_map.h>
 
 
-FetchResult<json> KeyMap::fetch(std::string key) {
+FetchResult KeyMap::fetch(const std::string& key) {
     if(data.find(key) == data.end()) {
-        return FetchResult<json>::error();
+        return FetchResult::error();
     } else {
-        return FetchResult<json>::success(std::make_unique<json>(*data[key]));
+        // This copies the data and returns it to the user
+        // This is the semantics we want (it allows the fetcher
+        // to own the data)
+        return FetchResult::success(std::vector<char>(data[key]));
     }
 }
 
 
-StoreResult KeyMap::store(std::string key, std::unique_ptr<json> payload) {
+StoreResult KeyMap::store(const std::string& key, std::vector<char>&& payload) {
 
     // The underlying storage takes ownership of the JSON
-    data[key] = std::move(payload);
+    data[key] = payload;
 
     return StoreResult(true);
 }

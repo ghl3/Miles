@@ -12,29 +12,40 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
+#include "gsl.h"
 
 
-std::string generateRandomId(size_t length = 0);
+namespace utils {
 
-class TempDirectory {
+    std::string generateRandomId(size_t length = 0);
 
-public:
+    class TempDirectory {
 
-    explicit TempDirectory(const std::string &prefix): path((std::stringstream() << prefix << generateRandomId(12)).str()) {
-        boost::filesystem::create_directories(path.c_str());
-    }
+        public:
 
-    ~TempDirectory() {
-        boost::filesystem::remove_all(this->path.c_str());
-    }
+        explicit TempDirectory(const std::string &prefix): path((std::stringstream() << prefix << utils::generateRandomId(12)).str()) {
+            boost::filesystem::create_directories(path.c_str());
+        }
 
-    const std::string& getPath() const {
-        return this->path;
-    }
+        ~TempDirectory() {
+            boost::filesystem::remove_all(this->path.c_str());
+        }
 
-private:
-    const std::string path;
-};
+        const std::string& getPath() const {
+            return this->path;
+        }
+
+        private:
+        const std::string path;
+
+    };
+
+
+    std::vector<char> stringToCharVector(const std::string& s);
+
+    std::string charVectorToString(const std::vector<char>& data);
+
+}
 
 
 #endif //MILES_UTILS_H

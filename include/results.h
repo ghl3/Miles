@@ -6,8 +6,9 @@
 #define MILES_RESULTS_H
 
 #include "json.h"
+#include "utils.h"
 
-//using json = nlohmann::json;
+using json = nlohmann::json;
 
 
 class StoreResult {
@@ -19,36 +20,43 @@ public:
 
 };
 
-template <class T>
 class FetchResult {
 
 public:
 
-    //explicit FetchResult(bool r) : success(r), payload(nullptr) {;}
-
-    FetchResult(FetchResult<T>&& that) noexcept: isSuccess(that.isSuccess), payload(that.payload.release()) {
+    FetchResult(FetchResult&& that) noexcept: isSuccess(that.isSuccess), payload(std::move(that.payload)) {
       ;
     }
 
-    static FetchResult<T> success(std::unique_ptr<T> p) {
+    static FetchResult success(std::vector<char>&& p) {
         return FetchResult(true, std::move(p));
     }
 
-    static FetchResult<T> error() {
-        return FetchResult(false, nullptr);
+    static FetchResult error() {
+        return FetchResult(false, std::vector<char>());
     }
 
     const bool isSuccess;
 
-    const T& getPayload() {
-        return *payload;
+    const std::vector<char> getPayload() {
+        return payload;
+    }
+
+    const std::string getAsString() {
+        return utils::charVectorToString(this->payload);
+        std::string result(this->payload.begin(), this->payload.end());
+        return result;
+    }
+
+    const std::string getAsJson() {
+        return json::parse(getAsString());
     }
 
 private:
 
-    explicit FetchResult(bool s, std::unique_ptr<T> p) : isSuccess(s), payload(p.release()) {;}
+    explicit FetchResult(bool s, std::vector<char>&& p) : isSuccess(s), payload(std::move(p)) {;}
 
-    std::unique_ptr<const T> payload;
+    std::vector<char> payload;
 
 };
 

@@ -7,13 +7,13 @@
 
 #include <vector>
 
-#include "key_storage.h"
+#include "storable.h"
 #include "key_map.h"
 #include "sstable.h"
 #include "wal.h"
 
 
-// A HybridKeyStorage is a storage engine that combines
+// A Table is a storage engine that combines
 // on-disk SS-Tables and an in-memory key-val map
 // (which is backed by a Write-Ahead-Log for durability).
 // New writes are written to the in-memory storage and the WAL.
@@ -23,7 +23,7 @@
 // are then cleared (the WAL should always be in-sync with
 // the in-memory storage).
 //
-class HybridKeyStorage: public IKeyStorage<json> {
+class Table: public IStorable, IFetchable {
 
     // TODO: Make a HybridTableStorage, and then make the
     // storage engine have a list of HybridTableStorage objects
@@ -31,22 +31,22 @@ class HybridKeyStorage: public IKeyStorage<json> {
 
 public:
 
-    explicit HybridKeyStorage(std::string directory, size_t maxInMemorySize):
+    explicit Table(std::string directory, size_t maxInMemorySize):
             directory(std::move(directory)),
             maxInMemorySize(maxInMemorySize),
             inMemoryStorage(std::make_unique<KeyMap>()),
             wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str()))
            {;}
 
-    ~HybridKeyStorage() override;
+    ~Table() override;
 
-    FetchResult<json> fetch(std::string key) override;
+    FetchResult fetch(const std::string& key) override;
 
-    StoreResult store(std::string key, std::unique_ptr<json> payload);
+    StoreResult store(const std::string& key, std::vector<char>&& payload) override;
 
     static std::vector<std::string>  getDataFiles(std::string directory);
 
-    static std::unique_ptr<HybridKeyStorage> buildFromDirectory(std::string directory, size_t maxInMemorySize);
+    static std::unique_ptr<Table> buildFromDirectory(std::string directory, size_t maxInMemorySize);
 
 private:
 

@@ -8,10 +8,11 @@
 #include <fstream>
 #include <utility>
 
-#include "key_storage.h"
+#include "storable.h"
 #include "key_map.h"
 
-using json = nlohmann::json;
+#include "gsl.h"
+#include "fetchable.h"
 
 
 class IndexEntry {
@@ -77,6 +78,7 @@ private:
  *
  * The on-disk format of the table is the following:
  *
+ * METADATA
  * DATA
  * INDEX
  *
@@ -84,13 +86,14 @@ private:
  * payloads (stored as raw bytes) and the INDEX section
  * consists triplets:
  *
- * (keyHash, offset, length)
+ * (keyHash, offset, length, compressed)
  *
  * with the following sizes:
  *
  * keyHash: 8 bytes
  * offset: 8 bytes
  * length: 8 bytes
+ * compressed: 1 byte
  *
  * The index entries are ordered by their keyHash
  * (with the keyHash interpreted as an integer).
@@ -102,19 +105,19 @@ private:
  * to JSON on the way out).
  *
  */
-class SSTable: public IKeyStorage<json> {
+class SSTable: public IFetchable {
 
 public:
 
-    FetchResult<json> fetch(std::string key) override;
-
-    std::vector<IndexEntry> buildIndex();
+    FetchResult fetch(const std::string& key) override;
 
     static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap& km, std::string fileName);
 
     static std::unique_ptr<SSTable> createFromFileName(const std::string& fileName);
 
-    std::unique_ptr<json> getData(IndexEntry idx);
+    std::vector<IndexEntry> buildIndex();
+
+    FetchResult getData(IndexEntry idx);
 
 
 private:

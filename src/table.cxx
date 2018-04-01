@@ -10,24 +10,24 @@
 #include <boost/regex.hpp>
 
 
-#include "hybrid_key_storage.h"
+#include "table.h"
 
 namespace fs = ::boost::filesystem;
 
 
-HybridKeyStorage::~HybridKeyStorage() {
+Table::~Table() {
     this->saveInMemoryToDisk();
     this->wal->clear();
 }
 
-StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> payload) {
+StoreResult Table::store(const std::string& key, std::vector<char>&& payload) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
     // If the key is already in the in-memory storage, we
     // store it at the current location
     if (this->inMemoryStorage->containsKey(key)) {
-        wal->log(key, *payload);
+        wal->log(key, payload);
         return this->inMemoryStorage->store(key, std::move(payload));
     }
 
@@ -41,12 +41,12 @@ StoreResult HybridKeyStorage::store(std::string key, std::unique_ptr<json> paylo
     }
 
     // Save the key to in-memory storage
-    wal->log(key, *payload);
+    wal->log(key, payload);
     return this->inMemoryStorage->store(key, std::move(payload));
 }
 
 
-FetchResult<json> HybridKeyStorage::fetch(std::string key) {
+FetchResult Table::fetch(const std::string& key) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
@@ -64,12 +64,12 @@ FetchResult<json> HybridKeyStorage::fetch(std::string key) {
             }
         }
 
-        return FetchResult<json>::error();
+        return FetchResult::error();
     }
 }
 
 
-bool HybridKeyStorage::saveInMemoryToDisk() {
+bool Table::saveInMemoryToDisk() {
     std::string fileName = (std::stringstream() << directory << "/" << "table_" << this->diskStorage.size() << ".dat").str();
     auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
     this->diskStorage.push_back(std::move(newSSTable));
@@ -77,7 +77,7 @@ bool HybridKeyStorage::saveInMemoryToDisk() {
 }
 
 
-std::vector<std::string> HybridKeyStorage::getDataFiles(std::string directory) {
+std::vector<std::string> Table::getDataFiles(std::string directory) {
 
     const boost::regex my_filter( "table.*\\.dat" );
 
@@ -99,12 +99,12 @@ std::vector<std::string> HybridKeyStorage::getDataFiles(std::string directory) {
 }
 
 
-std::unique_ptr<HybridKeyStorage> HybridKeyStorage::buildFromDirectory(std::string directory, size_t maxInMemorySize) {
+std::unique_ptr<Table> Table::buildFromDirectory(std::string directory, size_t maxInMemorySize) {
 
-    auto ptr = std::make_unique<HybridKeyStorage>(directory, maxInMemorySize);
+    auto ptr = std::make_unique<Table>(directory, maxInMemorySize);
 
     // TODO: Ensure data files are returned in the right order (they appear to not be)
-    for (const auto &path: HybridKeyStorage::getDataFiles(directory)) {
+    for (const auto &path: Table::getDataFiles(directory)) {
         ptr->diskStorage.push_back(SSTable::createFromFileName(path));
     }
 

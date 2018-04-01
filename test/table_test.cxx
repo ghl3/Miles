@@ -4,7 +4,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include <storage.h>
+#include <database.h>
 
 #include "utils.h"
 
@@ -22,13 +22,13 @@ std::string fileToString(const std::string &fileName) {
 TEST(hybrid_key_storage, store_and_fetch)
 {
 
-    TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
+    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
-    auto storage = std::make_unique<HybridKeyStorage>(tmpDir.getPath(), 10);
+    auto storage = std::make_unique<Table>(tmpDir.getPath(), 10);
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
-    auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));
-    auto storeResult = storage->store("foo", std::move(payload));
+    auto payload = json::array({{"a", 10}, {"b", 20}});
+    auto storeResult = storage->store("foo", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo").isSuccess);
@@ -41,16 +41,16 @@ TEST(hybrid_key_storage, store_and_fetch)
 TEST(hybrid_key_storage, move_to_disk)
 {
 
-    TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
+    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
-    auto storage = std::make_unique<HybridKeyStorage>(tmpDir.getPath(), 2);
+    auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
-    storage->store("a", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
-    storage->store("b", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
-    storage->store("d", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
-    storage->store("c", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
-    storage->store("z", std::make_unique<json>(json::array({{"a", 10}, {"b", 20}})));
+    storage->store("a", json::array({{"a", 10}, {"b", 20}}));
+    storage->store("b", json::array({{"a", 10}, {"b", 20}}));
+    storage->store("d", json::array({{"a", 10}, {"b", 20}}));
+    storage->store("c", json::array({{"a", 10}, {"b", 20}}));
+    storage->store("z", json::array({{"a", 10}, {"b", 20}}));
 
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
     EXPECT_EQ(true, storage->fetch("a").isSuccess);
@@ -71,18 +71,18 @@ TEST(hybrid_key_storage, move_to_disk)
 TEST(hybrid_key_storage, reload_from_file)
 {
 
-    TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
+    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
 
     {
-        auto storage = std::make_unique<HybridKeyStorage>(tmpDir.getPath(), 2);
-        storage->store("a", std::make_unique<json>(json::array({{"x", 10}, {"y", 20}})));
-        storage->store("b", std::make_unique<json>(json::array({{"x", 20}, {"y", 40}})));
-        storage->store("d", std::make_unique<json>(json::array({{"x", 30}, {"y", 60}})));
-        storage->store("c", std::make_unique<json>(json::array({{"x", 40}, {"y", 80}})));
-        storage->store("e", std::make_unique<json>(json::array({{"x", 50}, {"y", 100}})));
+        auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
+        storage->store("a", json::array({{"x", 10}, {"y", 20}}));
+        storage->store("b", json::array({{"x", 20}, {"y", 40}}));
+        storage->store("d", json::array({{"x", 30}, {"y", 60}}));
+        storage->store("c", json::array({{"x", 40}, {"y", 80}}));
+        storage->store("e", json::array({{"x", 50}, {"y", 100}}));
     }
 
-    auto storage = HybridKeyStorage::buildFromDirectory(tmpDir.getPath(), 2);
+    auto storage = Table::buildFromDirectory(tmpDir.getPath(), 2);
 
     EXPECT_EQ(json::array({{"x", 10}, {"y", 20}}), storage->fetch("a").getPayload());
     EXPECT_EQ(json::array({{"x", 20}, {"y", 40}}), storage->fetch("b").getPayload());

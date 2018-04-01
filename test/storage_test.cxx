@@ -4,7 +4,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include <storage.h>
+#include <database.h>
 
 #include "utils.h"
 
@@ -15,13 +15,13 @@ using json = nlohmann::json;
 TEST(storage_test, map_storage)
 {
 
-    TempDirectory tmpDir("/tmp/miles/storage_test_");
+    utils::TempDirectory tmpDir("/tmp/miles/storage_test_");
 
-    auto storage = std::make_unique<Storage>(tmpDir.getPath(), 10);
+    auto storage = std::make_unique<Database>(tmpDir.getPath(), 10);
     EXPECT_EQ(false, storage->fetch("foo", "bar").isSuccess);
 
-    auto payload = std::make_unique<json>(json::array({{"a", 10}, {"b", 20}}));
-    auto storeResult = storage->store("foo", "bar", std::move(payload));
+    auto payload = json::array({{"a", 10}, {"b", 20}});
+    auto storeResult = storage->store("foo", "bar", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
     EXPECT_EQ(true, storage->fetch("foo", "bar").isSuccess);

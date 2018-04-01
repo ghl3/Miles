@@ -8,20 +8,21 @@
 #include <string>
 #include <unordered_map>
 #include "results.h"
-#include "key_storage.h"
+#include "storable.h"
+#include "fetchable.h"
 
 using json = nlohmann::json;
 
 
-class KeyMap: public IKeyStorage<json> {
+class KeyMap: public IStorable, IFetchable {
 
 public:
 
     explicit KeyMap() {;}
 
-    FetchResult<json> fetch(std::string key) override;
+    FetchResult fetch(const std::string& key) override;
 
-    StoreResult store(std::string key, std::unique_ptr<json> payload);
+    StoreResult store(const std::string& key, std::vector<char>&& payload) override;
 
     bool containsKey(const std::string& key) const;
 
@@ -29,12 +30,12 @@ public:
         return data.size();
     };
 
-    std::map<std::string, std::shared_ptr<json>>::const_iterator begin() const { return data.cbegin(); }
-    std::map<std::string, std::shared_ptr<json>>::const_iterator end() const { return data.cend(); }
+    std::map<std::string, std::vector<char>>::const_iterator begin() const { return data.cbegin(); }
+    std::map<std::string, std::vector<char>>::const_iterator end() const { return data.cend(); }
 
 private:
 
-    std::map<std::string, std::shared_ptr<json>> data;
+    std::map<std::string, std::vector<char>> data;
 
 };
 

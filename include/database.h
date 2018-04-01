@@ -9,7 +9,7 @@
 
 #include "json.h"
 #include "results.h"
-#include "hybrid_key_storage.h"
+#include "table.h"
 
 #ifndef MILES_STORAGE_H
 #define MILES_STORAGE_H
@@ -18,19 +18,19 @@ using json = nlohmann::json;
 
 
 
-class Storage {
+class Database {
 
 
 public:
 
-    explicit Storage(std::string directory, size_t maxStorageSize):
+    explicit Database(const std::string& directory, size_t maxStorageSize):
             maxStorageSize(maxStorageSize),
             directory(directory)
     {;}
 
-    StoreResult store(std::string table, std::string key,  std::unique_ptr<json> payload);
+    StoreResult store(const std::string& table, const std::string& key, std::vector<char>&& payload);
 
-    FetchResult<json> fetch(std::string table, std::string key);
+    FetchResult fetch(const std::string& table, const std::string& key);
 
 private:
 
@@ -38,7 +38,7 @@ private:
 
     const std::string directory;
 
-    std::unordered_map<std::string, std::unique_ptr<HybridKeyStorage>> tableMap;
+    std::unordered_map<std::string, std::unique_ptr<Table>> tableMap;
 
 };
 

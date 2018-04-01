@@ -5,19 +5,36 @@
 
 #include <string>
 #include <random>
+#include <utils.h>
 
 
-std::string generateRandomId(size_t length = 0) {
-static const std::string allowed_chars {"123456789abcdefghjklmnpqrstuvwxyz"};
+std::string utils::generateRandomId(size_t length) {
 
-static thread_local std::default_random_engine randomEngine(std::random_device{}());
-static thread_local std::uniform_int_distribution<size_t> randomDistribution(0, allowed_chars.size() - 1);
+    static const std::string allowed_chars {"123456789abcdefghjklmnpqrstuvwxyz"};
 
-std::string id(length ? length : 32, '\0');
+    static thread_local std::default_random_engine randomEngine(std::random_device{}());
+    static thread_local std::uniform_int_distribution<size_t> randomDistribution(0, allowed_chars.size() - 1);
 
-for (std::string::value_type& c : id) {
-c = allowed_chars[randomDistribution(randomEngine)];
+    std::string id(length ? length : 32, '\0');
+
+    for (std::string::value_type& c : id) {
+        c = allowed_chars[randomDistribution(randomEngine)];
+    }
+
+    return id;
 }
 
-return id;
+
+
+
+std::vector<char> utils::stringToCharVector(const std::string& s) {
+    std::vector<char> retval;
+    std::copy(s.begin(), s.end(), std::back_inserter(retval));
+    return retval;
+}
+
+
+std::string utils::charVectorToString(const std::vector<char>& data) {
+    std::string result(data.begin(), data.end());
+    return result;
 }

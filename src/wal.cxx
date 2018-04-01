@@ -7,7 +7,6 @@
 #include <results.h>
 #include <wal.h>
 
-
 #include <iostream>
 #include <fstream>
 
@@ -17,11 +16,21 @@
 #include <string>
 
 
-bool Wal::log(std::string key, const json& payload) {
+bool Wal::log(const std::string& key, const std::vector<char>& payload) {
     this->file.clear();
     this->file << key << std::endl;
-    this->file << payload.dump() << std::endl;
+    this->file.write(reinterpret_cast<const char*>(&payload), sizeof(unsigned char));
+    //this->file << payload.as_bytes() << std::endl;
     return true;
+}
+
+bool Wal::log(const std::string& key, const json& payload) {
+    return Wal::log(key, utils::stringToCharVector(payload.dump()));
+    //this->file.clear();
+    //this->file << key << std::endl;
+    //this->file.write(reinterpret_cast<const char*>(&payload), sizeof(unsigned char));
+    //this->file << payload.as_bytes() << std::endl;
+    //return true;
 }
 
 
@@ -41,7 +50,7 @@ std::pair<std::unique_ptr<Wal>, std::unique_ptr<KeyMap>> Wal::buildKeyMapAndWall
         auto key = *it;
         ++it;
         //auto payload =
-        keyMap->store(key, std::make_unique<json>(json::parse(*it)));
+        keyMap->store(key, json::parse(*it));
     }
 
    return std::make_pair(std::move(wal), std::move(keyMap));

@@ -2,7 +2,7 @@
 
 #include <utility>
 #include <string>
-#include <storage.h>
+#include <database.h>
 
 #include "json.h"
 #include "crow.h"
@@ -10,7 +10,7 @@
 using json = nlohmann::json;
 
 
-std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& storage) {
+std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& storage) {
 
     auto app = std::make_unique<crow::SimpleApp>();
 
@@ -24,8 +24,8 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
 
                  try {
 
-                     auto payload = std::make_unique<json>(json::parse(req.body));
-                     std::cout << *payload << std::endl;
+                     auto payload = json::parse(req.body);
+                     //std::cout << payload.dump() << std::endl;
                      auto storageResult = storage->store(table, key, std::move(payload));
                      std::cout << "Did we store successfully: " << storageResult.isSuccess << std::endl;
                      return crow::response(200, "Successfully stored key");
@@ -42,7 +42,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
                 std::cout << "Did we fetch successfully: " << fetchResult.isSuccess << std::endl;
 
                 if (fetchResult.isSuccess) {
-                    return crow::response(200, fetchResult.getPayload().dump());
+                    return crow::response(200, fetchResult.getAsString());
                 } else {
                     return crow::response(404);
                 }
@@ -84,7 +84,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Storage>& st
 int main() {
 
     // Initialize the Sorage Engine
-    std::unique_ptr<Storage> storage = std::make_unique<Storage>("foo", 10);
+    std::unique_ptr<Database> storage = std::make_unique<Database>("foo", 10);
 
     // Initialize the webserver
     auto app = createServer(std::move(storage));
