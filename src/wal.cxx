@@ -19,19 +19,13 @@
 bool Wal::log(const std::string& key, const std::vector<char>& payload) {
     this->file.clear();
     this->file << key << std::endl;
-    this->file.write(reinterpret_cast<const char*>(&(payload[0])), payload.size()); //sizeof(unsigned char));
+    this->file.write(&(payload[0]), payload.size());
     this->file << std::endl;
-    //this->file << payload.as_bytes() << std::endl;
     return true;
 }
 
 bool Wal::logJson(const std::string& key, const json& payload) {
     return Wal::log(key, utils::stringToCharVector(payload.dump()));
-    //this->file.clear();
-    //this->file << key << std::endl;
-    //this->file.write(reinterpret_cast<const char*>(&payload), sizeof(unsigned char));
-    //this->file << payload.as_bytes() << std::endl;
-    //return true;
 }
 
 
@@ -51,8 +45,7 @@ std::pair<std::unique_ptr<Wal>, std::unique_ptr<KeyMap>> Wal::buildKeyMapAndWall
         auto key = *it;
         ++it;
         std::string val = *it;
-        //auto payload =
-        keyMap->store(key, utils::stringToCharVector(val)); //json::parse(*it));
+        keyMap->store(key, utils::stringToCharVector(val));
     }
 
    return std::make_pair(std::move(wal), std::move(keyMap));

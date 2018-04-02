@@ -22,10 +22,8 @@ FetchResult KeyMap::fetch(const std::string& key) {
 
 
 StoreResult KeyMap::store(const std::string& key, std::vector<char>&& payload) {
-
-    // The underlying storage takes ownership of the JSON
-    data[key] = payload;
-
+    // The data member takes ownership of the underlying payload data
+    data.emplace(key, std::move(payload));
     return StoreResult(true);
 }
 

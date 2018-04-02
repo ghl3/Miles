@@ -9,9 +9,6 @@
 #include <zip.h>
 #include <iostream>
 
-//using json = nlohmann::json;
-
-
 
 FetchResult SSTable::fetch(const std::string& key) {
 

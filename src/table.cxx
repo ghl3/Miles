@@ -81,7 +81,7 @@ std::vector<std::string> Table::getDataFiles(std::string directory) {
 
     const boost::regex my_filter( "table.*\\.dat" );
 
-    fs::directory_iterator it(directory); // + "/table_*.dat");
+    fs::directory_iterator it(directory);
     fs::directory_iterator endit;
     std::vector<std::string> ret;
 

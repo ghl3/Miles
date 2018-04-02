@@ -22,12 +22,6 @@ public:
 
     virtual StoreResult store(const std::string& key, std::vector<char>&&)=0;
 
-    /*
-    StoreResult store(const std::string& key, const std::string& payload) {
-        return store(key, utils::stringToCharVector(payload));
-    }
-     */
-
     StoreResult storeJson(const std::string& key, const json& payload) {
         return store(key, utils::jsonToCharVector(payload));
     }
