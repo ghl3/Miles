@@ -9,6 +9,8 @@
 #include <boost/concept_check.hpp>
 #include <boost/regex.hpp>
 
+#include <glog/logging.h>
+
 
 #include "table.h"
 
@@ -34,7 +36,7 @@ StoreResult Table::store(const std::string& key, std::vector<char>&& payload) {
     // If the in-memory storage is at the max size,
     // move it to disk and create a fresh in-memory storage
     if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
-        std::cout << "Moving in-memory map to new SSTable" << std::endl;
+        LOG(INFO) << "Moving in-memory map to new SSTable" << std::endl;
         this->saveInMemoryToDisk();
         this->wal->clear();
         this->inMemoryStorage = std::make_unique<KeyMap>();

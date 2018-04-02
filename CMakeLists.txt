@@ -38,8 +38,16 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-add_executable(miles src/miles.cxx ${SRC_FILES})
-target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})
+
+
+#
+# Configure logging
+#
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/modules/glog
+                 ${CMAKE_SOURCE_DIR}/modules/glog
+                 EXCLUDE_FROM_ALL)
+
 
 #
 # Configure google test
@@ -50,14 +58,23 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
                  EXCLUDE_FROM_ALL)
 
 
-#-------------------
-# Test
-#-------------------
+
+#
+# Create the main executable
+#
+
+add_executable(miles src/miles.cxx ${SRC_FILES})
+target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)
+
+
+#
+# Create the test executable
+#
 
 enable_testing()
 
 file(GLOB TEST_SRC_FILES ${CMAKE_SOURCE_DIR}/test/test_*.cxx)
 
 add_executable(testall test/test_all.cxx ${TEST_SRC_FILES} ${SRC_FILES})
-add_dependencies(testall "googletest.git")
-target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})
+#add_dependencies(testall "googletest.git")
+target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)

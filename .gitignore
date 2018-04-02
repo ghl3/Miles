@@ -11,3 +11,4 @@ googletest.git-prefix/
 .idea
 *.cbp
 *.pc
+*.cmake

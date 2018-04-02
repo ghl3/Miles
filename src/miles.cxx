@@ -1,11 +1,13 @@
 
-
 #include <utility>
 #include <string>
 #include <database.h>
 
 #include "json.h"
 #include "crow.h"
+
+#include <glog/logging.h>
+
 
 using json = nlohmann::json;
 
@@ -23,11 +25,9 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& s
             ([=](const crow::request &req, const std::string table, const std::string key) {
 
                  try {
-
                      auto payload = json::parse(req.body);
-                     //std::cout << payload.dump() << std::endl;
                      auto storageResult = storage->store(table, key, std::move(payload));
-                     std::cout << "Did we store successfully: " << storageResult.isSuccess << std::endl;
+                     LOG(INFO) << "Storage result: " << storageResult.isSuccess << std::endl;
                      return crow::response(200, "Successfully stored key");
 
                  } catch (const json::parse_error &e) {
@@ -39,7 +39,8 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& s
             ([=](const std::string table, const std::string key) {
 
                 auto fetchResult = storage->fetch(table, key);
-                std::cout << "Did we fetch successfully: " << fetchResult.isSuccess << std::endl;
+
+                LOG(INFO) << "Fetch result: " << fetchResult.isSuccess << std::endl;
 
                 if (fetchResult.isSuccess) {
                     return crow::response(200, fetchResult.getAsString());
@@ -81,7 +82,10 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& s
 }
 
 
-int main() {
+int main(int argc, char **argv) {
+
+    // Initialize logging
+    google::InitGoogleLogging(argv[0]);
 
     // Initialize the Sorage Engine
     std::unique_ptr<Database> storage = std::make_unique<Database>("foo", 10);
