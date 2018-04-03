@@ -93,18 +93,21 @@ add_custom_target(
         check
         COMMAND cppcheck
         --enable=warning,performance,portability,information,missingInclude
-        --std=c++11
+        --std=c++14
         --library=qt.cfg
         --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
         --verbose
         --quiet
+        --force
+        --suppress="*:${PROJECT_SOURCE_DIR}/include/json.h"
+        --suppress="*:${PROJECT_SOURCE_DIR}/include/gsl.h"
         ${ALL_SOURCE_FILES}
 )
 
 add_custom_target(
         format
         COMMAND clang-format
-        -style=LLVM
+        -style=file #LLVM
         -i
         ${ALL_SOURCE_FILES}
 )

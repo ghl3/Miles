@@ -24,45 +24,45 @@
 //
 class Table : public IStorable, IFetchable {
 
-  // TODO: Make a HybridTableStorage, and then make the
-  // storage engine have a list of HybridTableStorage objects
-  // (one per table)
+    // TODO: Make a HybridTableStorage, and then make the
+    // storage engine have a list of HybridTableStorage objects
+    // (one per table)
 
-public:
-  explicit Table(std::string directory, size_t maxInMemorySize)
-      : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
-        inMemoryStorage(std::make_unique<KeyMap>()),
-        wal(std::make_unique<Wal>(
-            (std::stringstream() << this->directory << "/wal.log").str())) {
-    ;
-  }
+  public:
+    explicit Table(std::string directory, size_t maxInMemorySize)
+        : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
+          inMemoryStorage(std::make_unique<KeyMap>()),
+          wal(std::make_unique<Wal>(
+              (std::stringstream() << this->directory << "/wal.log").str())) {
+        ;
+    }
 
-  ~Table() override;
+    ~Table() override;
 
-  FetchResult fetch(const std::string &key) override;
+    FetchResult fetch(const std::string &key) override;
 
-  StoreResult store(const std::string &key,
-                    std::vector<char> &&payload) override;
+    StoreResult store(const std::string &key,
+                      std::vector<char> &&payload) override;
 
-  static std::vector<std::string> getDataFiles(std::string directory);
+    static std::vector<std::string> getDataFiles(std::string directory);
 
-  static std::unique_ptr<Table> buildFromDirectory(std::string directory,
-                                                   size_t maxInMemorySize);
+    static std::unique_ptr<Table> buildFromDirectory(std::string directory,
+                                                     size_t maxInMemorySize);
 
-private:
-  bool saveInMemoryToDisk();
+  private:
+    bool saveInMemoryToDisk();
 
-  const std::string directory;
+    const std::string directory;
 
-  const size_t maxInMemorySize;
+    const size_t maxInMemorySize;
 
-  std::unique_ptr<KeyMap> inMemoryStorage;
+    std::unique_ptr<KeyMap> inMemoryStorage;
 
-  std::vector<std::unique_ptr<SSTable>> diskStorage;
+    std::vector<std::unique_ptr<SSTable>> diskStorage;
 
-  std::unique_ptr<Wal> wal;
+    std::unique_ptr<Wal> wal;
 
-  std::mutex lock;
+    std::mutex lock;
 };
 
 #endif // MILES_HYBRID_KEY_STORAGE_H

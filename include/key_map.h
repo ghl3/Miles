@@ -15,27 +15,27 @@ using json = nlohmann::json;
 
 class KeyMap : public IStorable, IFetchable {
 
-public:
-  explicit KeyMap() { ; }
+  public:
+    explicit KeyMap() { ; }
 
-  FetchResult fetch(const std::string &key) override;
+    FetchResult fetch(const std::string &key) override;
 
-  StoreResult store(const std::string &key,
-                    std::vector<char> &&payload) override;
+    StoreResult store(const std::string &key,
+                      std::vector<char> &&payload) override;
 
-  bool containsKey(const std::string &key) const;
+    bool containsKey(const std::string &key) const;
 
-  size_t size() const { return data.size(); };
+    size_t size() const { return data.size(); };
 
-  std::map<std::string, std::vector<char>>::const_iterator begin() const {
-    return data.cbegin();
-  }
-  std::map<std::string, std::vector<char>>::const_iterator end() const {
-    return data.cend();
-  }
+    std::map<std::string, std::vector<char>>::const_iterator begin() const {
+        return data.cbegin();
+    }
+    std::map<std::string, std::vector<char>>::const_iterator end() const {
+        return data.cend();
+    }
 
-private:
-  std::map<std::string, std::vector<char>> data;
+  private:
+    std::map<std::string, std::vector<char>> data;
 };
 
 #endif // MILES_KEY_MAP_H
