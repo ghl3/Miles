@@ -78,3 +78,33 @@ file(GLOB TEST_SRC_FILES ${CMAKE_SOURCE_DIR}/test/test_*.cxx)
 add_executable(testall test/test_all.cxx ${TEST_SRC_FILES} ${SRC_FILES})
 #add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)
+
+
+#
+# Add Checks and Formatting
+#
+
+file(GLOB ALL_SOURCE_FILES src/*.cxx include/*.h)
+list(REMOVE_ITEM ALL_SOURCE_FILES ${PROJECT_SOURCE_DIR}/include/crow.h)
+list(REMOVE_ITEM ALL_SOURCE_FILES ${PROJECT_SOURCE_DIR}/include/json.h)
+list(REMOVE_ITEM ALL_SOURCE_FILES ${PROJECT_SOURCE_DIR}/include/gsl.h)
+
+add_custom_target(
+        check
+        COMMAND cppcheck
+        --enable=warning,performance,portability,information,missingInclude
+        --std=c++11
+        --library=qt.cfg
+        --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
+        --verbose
+        --quiet
+        ${ALL_SOURCE_FILES}
+)
+
+add_custom_target(
+        format
+        COMMAND clang-format
+        -style=LLVM
+        -i
+        ${ALL_SOURCE_FILES}
+)
