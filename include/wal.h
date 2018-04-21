@@ -5,7 +5,7 @@
 #ifndef MILES_WAL_H
 #define MILES_WAL_H
 
-#include "key_map.h"
+#include "memtable.h"
 #include "results.h"
 #include <fstream>
 #include <ostream>
@@ -29,7 +29,7 @@ class Wal {
 
     bool clear();
 
-    static std::pair<std::unique_ptr<Wal>, std::unique_ptr<KeyMap>>
+    static std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>>
     buildKeyMapAndWall(std::string walPath);
 
     // TODO: Make an iterator over lines in a WAL

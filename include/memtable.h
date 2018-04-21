@@ -13,10 +13,10 @@
 
 using json = nlohmann::json;
 
-class KeyMap : public IStorable, IFetchable {
+class Memtable : public IStorable, IFetchable {
 
   public:
-    explicit KeyMap() { ; }
+    explicit Memtable() { ; }
 
     FetchResult fetch(const std::string &key) override;
 

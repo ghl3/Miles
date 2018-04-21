@@ -16,7 +16,7 @@ using json = nlohmann::json;
 
 TEST(sstable_test, map_storage)
 {
-    auto keyMap = std::make_unique<KeyMap>();
+    auto keyMap = std::make_unique<Memtable>();
     auto payload = json::array({{"a", 10}, {"b", 20}});
     auto storeResult = keyMap->storeJson("foo", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
@@ -36,7 +36,7 @@ TEST(sstable_test, map_storage)
 
 TEST(sstable_test, many_keys)
 {
-    auto keyMap = std::make_unique<KeyMap>();
+    auto keyMap = std::make_unique<Memtable>();
 
     keyMap->storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
 
@@ -59,7 +59,7 @@ TEST(sstable_test, many_keys)
 
 TEST(sstable_test, index_test)
 {
-    auto keyMap = std::make_unique<KeyMap>();
+    auto keyMap = std::make_unique<Memtable>();
 
     keyMap->storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
 

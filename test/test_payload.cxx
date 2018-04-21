@@ -15,7 +15,7 @@
 using json = nlohmann::json;
 
 
-TEST(test_payload, creation)
+TEST(payload, creation)
 {
 
     auto payload = Payload::fromString("Foobar");

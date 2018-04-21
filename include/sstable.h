@@ -8,7 +8,7 @@
 #include <fstream>
 #include <utility>
 
-#include "key_map.h"
+#include "memtable.h"
 #include "storable.h"
 
 #include "fetchable.h"
@@ -107,7 +107,7 @@ class SSTable : public IFetchable {
   public:
     FetchResult fetch(const std::string &key) override;
 
-    static std::unique_ptr<SSTable> createFromKeyMap(const KeyMap &km,
+    static std::unique_ptr<SSTable> createFromKeyMap(const Memtable &km,
                                                      std::string fileName);
 
     static std::unique_ptr<SSTable>

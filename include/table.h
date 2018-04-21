@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "key_map.h"
+#include "memtable.h"
 #include "sstable.h"
 #include "storable.h"
 #include "wal.h"
@@ -31,7 +31,7 @@ class Table : public IStorable, IFetchable {
   public:
     explicit Table(std::string directory, size_t maxInMemorySize)
         : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
-          inMemoryStorage(std::make_unique<KeyMap>()),
+          inMemoryStorage(std::make_unique<Memtable>()),
           wal(std::make_unique<Wal>(
               (std::stringstream() << this->directory << "/wal.log").str())) {
         ;
@@ -56,7 +56,7 @@ class Table : public IStorable, IFetchable {
 
     const size_t maxInMemorySize;
 
-    std::unique_ptr<KeyMap> inMemoryStorage;
+    std::unique_ptr<Memtable> inMemoryStorage;
 
     std::vector<std::unique_ptr<SSTable>> diskStorage;
 

@@ -11,10 +11,10 @@
 using json = nlohmann::json;
 
 
-TEST(key_map_test, map_storage)
+TEST(memtable, map_storage)
 {
 
-    auto storage = std::make_unique<KeyMap>();
+    auto storage = std::make_unique<Memtable>();
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
 
     json payload = json::array({{"a", 10}, {"b", 20}});

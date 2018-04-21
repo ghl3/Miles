@@ -103,7 +103,7 @@ uint64_t SSTable::hashKey(const std::string &key) {
 
 size_t COMPRESSION_THRESHOLD = 1024;
 
-std::unique_ptr<SSTable> SSTable::createFromKeyMap(const KeyMap &km,
+std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable &km,
                                                    std::string fileName) {
 
     // Create a new file

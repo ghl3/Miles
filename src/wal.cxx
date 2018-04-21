@@ -34,11 +34,11 @@ bool Wal::clear() {
     return true;
 }
 
-std::pair<std::unique_ptr<Wal>, std::unique_ptr<KeyMap>>
+std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>>
 Wal::buildKeyMapAndWall(std::string walPath) {
 
     auto wal = std::make_unique<Wal>(walPath);
-    auto keyMap = std::make_unique<KeyMap>();
+    auto keyMap = std::make_unique<Memtable>();
 
     for (std::istream_iterator<std::string> it = wal->begin(); it != wal->end();
          ++it) {

@@ -36,7 +36,7 @@ StoreResult Table::store(const std::string &key, std::vector<char> &&payload) {
         LOG(INFO) << "Moving in-memory map to new SSTable" << std::endl;
         this->saveInMemoryToDisk();
         this->wal->clear();
-        this->inMemoryStorage = std::make_unique<KeyMap>();
+        this->inMemoryStorage = std::make_unique<Memtable>();
     }
 
     // Save the key to in-memory storage
