@@ -63,7 +63,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
 # Create the main executable
 #
 
-add_executable(miles src/miles.cxx ${SRC_FILES})
+add_executable(miles src/miles.cxx ${SRC_FILES} include/bloomfilter.h src/bloomfilter.cxx)
 target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)
 
 
@@ -75,7 +75,7 @@ enable_testing()
 
 file(GLOB TEST_SRC_FILES ${CMAKE_SOURCE_DIR}/test/test_*.cxx)
 
-add_executable(testall test/test_all.cxx ${TEST_SRC_FILES} ${SRC_FILES})
+add_executable(testall test/test_all.cxx ${TEST_SRC_FILES} ${SRC_FILES} test/test_bloomfilter.cxx)
 #add_dependencies(testall "googletest.git")
 target_link_libraries(testall gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)
 
