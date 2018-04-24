@@ -19,7 +19,7 @@ using json = nlohmann::json;
 class Database {
 
   public:
-    explicit Database(const std::string &directory, size_t maxStorageSize)
+    explicit Database(const std::string& directory, size_t maxStorageSize)
         : maxStorageSize(maxStorageSize), directory(directory) {
         ;
     }

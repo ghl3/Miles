@@ -24,10 +24,6 @@
 //
 class Table : public IStorable, IFetchable {
 
-    // TODO: Make a HybridTableStorage, and then make the
-    // storage engine have a list of HybridTableStorage objects
-    // (one per table)
-
   public:
     explicit Table(std::string directory, size_t maxInMemorySize)
         : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
@@ -50,6 +46,7 @@ class Table : public IStorable, IFetchable {
                                                      size_t maxInMemorySize);
 
   private:
+
     bool saveInMemoryToDisk();
 
     const std::string directory;
