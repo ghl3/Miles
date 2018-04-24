@@ -134,15 +134,15 @@ class SSTable : public IFetchable {
 
     static std::unique_ptr<SSTable> createFromFileName(const std::string& fileName);
 
+    const std::string fileName;
+
     const Metadata metadata;
 
   private:
     explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file, Metadata metadata)
-        : fileName(std::move(fileName)), file(std::move(file)), metadata(metadata) {
+        : fileName(std::move(fileName)), metadata(metadata), file(std::move(file)) {
         ;
     }
-
-    const std::string fileName;
 
     std::unique_ptr<std::fstream> file;
 
