@@ -12,19 +12,13 @@
 
 FetchResult SSTable::fetch(const std::string &key) {
 
-    uint64_t keyHash = this->hashKey(key);
+    boost::optional<IndexEntry> idxOpt = getIndexByKey(key);
 
-    // TODO: Don't bring index into memory, use disk version directly
-    std::vector<IndexEntry> index = this->buildIndex();
-
-    // TODO: Do a faster search here
-    for (IndexEntry idx : index) {
-        if (idx.getKeyHash() == keyHash) {
-            return this->getData(idx);
-        }
+    if (idxOpt.is_initialized()) {
+        return this->getData(idxOpt.get());
+    } else {
+        return FetchResult::error();
     }
-
-    return FetchResult::error();
 }
 
 
@@ -65,7 +59,7 @@ boost::optional<IndexEntry> SSTable::getIndexByKey(const std::string& key) const
 
     // Find the start and the end of the index
     uint64_t leftIdx = 0;
-    uint64_t rightIdx = this->metadata.getNumKeys();
+    uint64_t rightIdx = this->metadata.getNumKeys() - 1;
 
     // Check the boundaries
     boost::optional<IndexEntry> left = this->getIndexByIdx(leftIdx);

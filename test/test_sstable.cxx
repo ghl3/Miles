@@ -63,10 +63,11 @@ TEST(test_sstable, many_keys) {
     auto keyMap = std::make_unique<Memtable>();
 
     keyMap->storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
-
     keyMap->storeJson("bar", json::array({{"a", 10}, {"b", 20},}));
-
     keyMap->storeJson("baz", json::array({{"a", 10}, {"b", 20},}));
+    keyMap->storeJson("bat", json::array({{"a", 10}, {"b", 20},}));
+    keyMap->storeJson("zap", json::array({{"a", 10}, {"b", 20},}));
+
 
     utils::TempDirectory tmpDir("/tmp/miles/test_sstable_many_keys");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
@@ -76,6 +77,10 @@ TEST(test_sstable, many_keys) {
     EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getAsJson());
     EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("baz").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("bat").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("zap").isSuccess);
+
     EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
 
 }
