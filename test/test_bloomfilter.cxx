@@ -18,3 +18,23 @@ TEST(bloomfilter, storage)
     EXPECT_EQ(false, bloomFilter.containsKey("bar"));
 
 }
+
+
+TEST(bloomfilter, clear)
+{
+
+    auto bloomFilter = BloomFilter(5, 2);
+
+    bloomFilter.add("foo");
+
+    EXPECT_EQ(true, bloomFilter.containsKey("foo"));
+    EXPECT_EQ(false, bloomFilter.containsKey("bar"));
+
+    bloomFilter.clear();
+
+    EXPECT_EQ(false, bloomFilter.containsKey("foo"));
+    EXPECT_EQ(false, bloomFilter.containsKey("bar"));
+
+}
+
+

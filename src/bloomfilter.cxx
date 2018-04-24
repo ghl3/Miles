@@ -8,11 +8,10 @@
 
 
 BloomFilter::BloomFilter(size_t numBits, size_t numHashes) :
-        bitMap(numBits, 0),
+        bitMap(numBits, false),
         hashSeeds(numHashes) {
     for (size_t i=0; i < numHashes; ++i) {
-        hashSeeds.at(i) = i; //std::hash<std::string>{};
-        //hashSeeds[i] = random();
+        hashSeeds.at(i) = i;
     }
 }
 
@@ -50,7 +49,7 @@ bool BloomFilter::containsKey(const std::string& key) {
         // If the bit is set for THIS key but not
         // in the bit map, then we KNOW FOR SURE
         // that this key has not been added.
-        if (hashBits[i] == true && bitMap[i] == false) {
+        if (hashBits[i] && !bitMap[i]) {
             return false;
         }
     }
@@ -63,7 +62,7 @@ bool BloomFilter::containsKey(const std::string& key) {
 
 
 void BloomFilter::clear() {
-    for (size_t i=0; i < bitMap.size(); ++i) {
-        bitMap[i] = false;
+    for (auto &&i : bitMap) {
+        i = false;
     }
 }

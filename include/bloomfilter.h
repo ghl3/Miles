@@ -48,8 +48,6 @@ private:
 
     std::vector<bool> bitMap;
 
-    //const std::bitset bitMap;
-
     std::vector<size_t> hashSeeds;
 
 
