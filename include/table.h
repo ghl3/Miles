@@ -28,25 +28,21 @@ class Table : public IStorable, IFetchable {
     explicit Table(std::string directory, size_t maxInMemorySize)
         : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
           inMemoryStorage(std::make_unique<Memtable>()),
-          wal(std::make_unique<Wal>(
-              (std::stringstream() << this->directory << "/wal.log").str())) {
+          wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str())) {
         ;
     }
 
     ~Table() override;
 
-    FetchResult fetch(const std::string &key) override;
+    FetchResult fetch(const std::string& key) override;
 
-    StoreResult store(const std::string &key,
-                      std::vector<char> &&payload) override;
+    StoreResult store(const std::string& key, std::vector<char>&& payload) override;
 
     static std::vector<std::string> getDataFiles(std::string directory);
 
-    static std::unique_ptr<Table> buildFromDirectory(std::string directory,
-                                                     size_t maxInMemorySize);
+    static std::unique_ptr<Table> buildFromDirectory(std::string directory, size_t maxInMemorySize);
 
   private:
-
     bool saveInMemoryToDisk();
 
     const std::string directory;

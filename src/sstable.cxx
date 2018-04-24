@@ -4,13 +4,13 @@
 
 #include <fstream>
 
+#include <hashing.h>
 #include <iostream>
 #include <results.h>
 #include <sstable.h>
 #include <zip.h>
-#include <hashing.h>
 
-FetchResult SSTable::fetch(const std::string &key) {
+FetchResult SSTable::fetch(const std::string& key) {
 
     boost::optional<IndexEntry> idxOpt = getIndexByKey(key);
 
@@ -20,7 +20,6 @@ FetchResult SSTable::fetch(const std::string &key) {
         return FetchResult::error();
     }
 }
-
 
 FetchResult SSTable::getData(IndexEntry idx) const {
     file->seekg(idx.getOffset());
@@ -34,7 +33,6 @@ FetchResult SSTable::getData(IndexEntry idx) const {
     return FetchResult::success(utils::stringToCharVector(data));
 }
 
-
 boost::optional<IndexEntry> SSTable::getIndexByIdx(uint64_t idx) const {
     if (idx > this->metadata.getNumKeys()) {
         return boost::none;
@@ -44,11 +42,11 @@ boost::optional<IndexEntry> SSTable::getIndexByIdx(uint64_t idx) const {
         // cast to an IndexEntry,
         // and return
 
-        uint64_t memoryOffset = this->metadata.getIndexStart() + idx*sizeof(IndexEntry);
+        uint64_t memoryOffset = this->metadata.getIndexStart() + idx * sizeof(IndexEntry);
 
         IndexEntry indexEntry;
         file->seekg(memoryOffset);
-        file->read(reinterpret_cast<char *>(&indexEntry), sizeof(IndexEntry));
+        file->read(reinterpret_cast<char*>(&indexEntry), sizeof(IndexEntry));
         return indexEntry;
     }
 }
@@ -89,8 +87,6 @@ boost::optional<IndexEntry> SSTable::getIndexByKey(const std::string& key) const
     return boost::none;
 }
 
-
-
 std::vector<IndexEntry> SSTable::buildIndex() {
 
     file->seekg(0);
@@ -106,7 +102,7 @@ std::vector<IndexEntry> SSTable::buildIndex() {
 
     for (uint i = 0; i < metadata.getNumKeys(); ++i) {
         IndexEntry ie;
-        file->read(reinterpret_cast<char *>(&ie), sizeof(IndexEntry));
+        file->read(reinterpret_cast<char*>(&ie), sizeof(IndexEntry));
         // TODO: We can write the index values directly into an array
         index[i] = ie;
     }
@@ -114,29 +110,29 @@ std::vector<IndexEntry> SSTable::buildIndex() {
     return index;
 }
 
-std::unique_ptr<SSTable> SSTable::createFromFileName(const std::string &fileName) {
+std::unique_ptr<SSTable> SSTable::createFromFileName(const std::string& fileName) {
 
     // Create a new file
     auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::ate);
 
     // Get the number of keys from the metadata at the beginning of the file
-    //Metadata metadata;
+    // Metadata metadata;
     file->seekg(0);
     Metadata metadata = Metadata::createFromFile(file.get());
 
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)};
 }
 
-uint64_t SSTable::hashKey(const std::string &key) const {
+uint64_t SSTable::hashKey(const std::string& key) const {
     return hashing::hashKeyWithSalt(key, this->metadata.getHashSalt());
 }
 
-std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable &km,
-                                                   std::string fileName,
+std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::string fileName,
                                                    uint64_t compressionThreshold) {
 
     // Create a new file
-    auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    auto file = std::make_unique<std::fstream>(fileName, std::fstream::in | std::fstream::out | std::fstream::trunc |
+                                                             std::fstream::binary);
 
     // Start at the beginning of the file
     file->seekp(0);
@@ -171,12 +167,11 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable &km,
         file->write(&payload[0], sizeInBytes);
     }
 
-    std::sort(begin(index), end(index), [](const auto &lhs, const auto &rhs) {
-        return lhs.getKeyHash() < rhs.getKeyHash();
-    });
+    std::sort(begin(index), end(index),
+              [](const auto& lhs, const auto& rhs) { return lhs.getKeyHash() < rhs.getKeyHash(); });
 
-    for (auto idx: index) {
-        file->write(reinterpret_cast<char *>(&idx), sizeof(IndexEntry));
+    for (auto idx : index) {
+        file->write(reinterpret_cast<char*>(&idx), sizeof(IndexEntry));
     }
 
     *file << std::endl;
@@ -184,7 +179,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable &km,
     // Finally, write the metadata to the beginning of the file
     auto metadata = Metadata(km.size(), currentOffset, hashSalt, compressionThreshold);
     file->seekp(0);
-    file->write(reinterpret_cast<char *>(&metadata), sizeof(Metadata));
+    file->write(reinterpret_cast<char*>(&metadata), sizeof(Metadata));
     file->flush();
 
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)};

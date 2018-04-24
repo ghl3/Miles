@@ -14,23 +14,21 @@
 class Wal {
 
   public:
-    explicit Wal(const std::string &path) : path(path) {
+    explicit Wal(const std::string& path) : path(path) {
         // Use a temporary stream to ensure hte
         // file exists if it hasn't yet been created
         auto tmpFile = std::ofstream(path, std::ios::app);
         tmpFile.close();
-        file = std::fstream(path, std::fstream::in | std::fstream::out |
-                                      std::fstream::ate);
+        file = std::fstream(path, std::fstream::in | std::fstream::out | std::fstream::ate);
     }
 
-    bool log(const std::string &key, const std::vector<char> &payload);
+    bool log(const std::string& key, const std::vector<char>& payload);
 
-    bool logJson(const std::string &key, const json &payload);
+    bool logJson(const std::string& key, const json& payload);
 
     bool clear();
 
-    static std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>>
-    buildKeyMapAndWall(std::string walPath);
+    static std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>> buildKeyMapAndWall(std::string walPath);
 
     // TODO: Make an iterator over lines in a WAL
     std::istream_iterator<std::string> begin() {

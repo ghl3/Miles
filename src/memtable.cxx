@@ -7,7 +7,7 @@
 #include <memtable.h>
 #include <results.h>
 
-FetchResult Memtable::fetch(const std::string &key) {
+FetchResult Memtable::fetch(const std::string& key) {
     if (data.find(key) == data.end()) {
         return FetchResult::error();
     } else {
@@ -18,12 +18,10 @@ FetchResult Memtable::fetch(const std::string &key) {
     }
 }
 
-StoreResult Memtable::store(const std::string &key, std::vector<char> &&payload) {
+StoreResult Memtable::store(const std::string& key, std::vector<char>&& payload) {
     // The data member takes ownership of the underlying payload data
     data.emplace(key, std::move(payload));
     return StoreResult(true);
 }
 
-bool Memtable::containsKey(const std::string &key) const {
-    return !(data.find(key) == data.end());
-}
+bool Memtable::containsKey(const std::string& key) const { return !(data.find(key) == data.end()); }

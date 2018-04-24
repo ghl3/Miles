@@ -13,10 +13,10 @@ class IFetchable {
     IFetchable() = default;
     virtual ~IFetchable() = default;
 
-    IFetchable(IFetchable const &) = delete;
-    void operator=(IFetchable const &x) = delete;
+    IFetchable(IFetchable const&) = delete;
+    void operator=(IFetchable const& x) = delete;
 
-    virtual FetchResult fetch(const std::string &) = 0;
+    virtual FetchResult fetch(const std::string&) = 0;
 };
 
 #endif // MILES_FETCHABLE_H

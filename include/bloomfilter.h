@@ -5,12 +5,10 @@
 #ifndef MILES_BLOOMFILTER_H
 #define MILES_BLOOMFILTER_H
 
-
-#include <string>
-#include <vector>
 #include <bitset>
+#include <string>
 #include <unordered_map>
-
+#include <vector>
 
 /**
  *
@@ -31,8 +29,7 @@
  */
 class BloomFilter {
 
-public:
-
+  public:
     BloomFilter(size_t numBits, size_t numHashes);
 
     void add(const std::string& key);
@@ -41,17 +38,12 @@ public:
 
     void clear();
 
-
-private:
-
+  private:
     std::vector<bool> getHashBits(const std::string& key);
 
     std::vector<bool> bitMap;
 
     std::vector<size_t> hashSeeds;
-
-
 };
 
-
-#endif //MILES_BLOOMFILTER_H
+#endif // MILES_BLOOMFILTER_H

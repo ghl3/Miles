@@ -20,18 +20,11 @@ class StoreResult {
 class FetchResult {
 
   public:
-    FetchResult(FetchResult &&that) noexcept
-        : isSuccess(that.isSuccess), payload(std::move(that.payload)) {
-        ;
-    }
+    FetchResult(FetchResult&& that) noexcept : isSuccess(that.isSuccess), payload(std::move(that.payload)) { ; }
 
-    static FetchResult success(std::vector<char> &&p) {
-        return FetchResult(true, std::move(p));
-    }
+    static FetchResult success(std::vector<char>&& p) { return FetchResult(true, std::move(p)); }
 
-    static FetchResult error() {
-        return FetchResult(false, std::vector<char>());
-    }
+    static FetchResult error() { return FetchResult(false, std::vector<char>()); }
 
     const bool isSuccess;
 
@@ -46,10 +39,7 @@ class FetchResult {
     const json getAsJson() { return json::parse(getAsString()); }
 
   private:
-    explicit FetchResult(bool s, std::vector<char> &&p)
-        : isSuccess(s), payload(std::move(p)) {
-        ;
-    }
+    explicit FetchResult(bool s, std::vector<char>&& p) : isSuccess(s), payload(std::move(p)) { ; }
 
     std::vector<char> payload;
 };

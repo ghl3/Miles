@@ -24,15 +24,13 @@ class Database {
         ;
     }
 
-    StoreResult store(const std::string &table, const std::string &key,
-                      std::vector<char> &&payload);
+    StoreResult store(const std::string& table, const std::string& key, std::vector<char>&& payload);
 
-    StoreResult storeJson(const std::string &table, const std::string &key,
-                          const json &data) {
+    StoreResult storeJson(const std::string& table, const std::string& key, const json& data) {
         return this->store(table, key, utils::jsonToCharVector(data));
     }
 
-    FetchResult fetch(const std::string &table, const std::string &key);
+    FetchResult fetch(const std::string& table, const std::string& key);
 
   private:
     const size_t maxStorageSize;

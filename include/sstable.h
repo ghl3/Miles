@@ -16,48 +16,30 @@
 #include "fetchable.h"
 #include "gsl.h"
 
-
 class IndexEntry {
 
-public:
-    explicit IndexEntry(uint64_t keyHash,
-                        uint64_t offset,
-                        uint64_t length,
-                        bool compressed = false)
-            : keyHash(keyHash), offset(offset), length(length),
-              compressed(compressed ? 1 : 0) {
+  public:
+    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length, bool compressed = false)
+        : keyHash(keyHash), offset(offset), length(length), compressed(compressed ? 1 : 0) {
         ;
     }
 
     // TODO: Hide this constructor for better encapsulation
-    explicit IndexEntry() : keyHash(), offset(), length(), compressed(0) {
-        ;
+    explicit IndexEntry() : keyHash(), offset(), length(), compressed(0) { ; }
+
+    uint64_t getKeyHash() const { return this->keyHash; }
+
+    uint64_t getOffset() const { return this->offset; }
+
+    uint64_t getLength() const { return this->length; }
+
+    bool getCompressed() const { return this->compressed != 0; }
+
+    bool operator==(const IndexEntry& other) const {
+        return other.keyHash == this->keyHash && other.offset == this->offset && other.length == this->length;
     }
 
-    uint64_t getKeyHash() const {
-        return this->keyHash;
-    }
-
-    uint64_t getOffset() const {
-        return this->offset;
-    }
-
-    uint64_t getLength() const {
-        return this->length;
-    }
-
-    bool getCompressed() const {
-        return this->compressed != 0;
-    }
-
-    bool operator==(const IndexEntry &other) const {
-        return other.keyHash == this->keyHash && other.offset == this->offset &&
-               other.length == this->length;
-    }
-
-
-protected:
-
+  protected:
     // Hash of the key
     uint64_t keyHash;
 
@@ -71,19 +53,11 @@ protected:
     uint64_t compressed;
 };
 
-
 class Metadata {
 
   public:
-
-    explicit Metadata(uint64_t numKeys,
-                      uint64_t indexOffset,
-                      uint64_t hashSalt,
-                      uint64_t compressionThreshold)
-        : numKeys(numKeys),
-        indexOffset(indexOffset),
-        hashSalt(hashSalt),
-        compressionThreshold(compressionThreshold) {
+    explicit Metadata(uint64_t numKeys, uint64_t indexOffset, uint64_t hashSalt, uint64_t compressionThreshold)
+        : numKeys(numKeys), indexOffset(indexOffset), hashSalt(hashSalt), compressionThreshold(compressionThreshold) {
         ;
     }
 
@@ -99,19 +73,17 @@ class Metadata {
 
     static Metadata createFromFile(std::fstream* file) {
         Metadata metadata;
-        file->read(reinterpret_cast<char *>(&metadata), sizeof(Metadata));
+        file->read(reinterpret_cast<char*>(&metadata), sizeof(Metadata));
         return metadata;
     }
 
   private:
-
     explicit Metadata() : numKeys(0), indexOffset(0), hashSalt(0), compressionThreshold(0) { ; }
 
     uint64_t numKeys;
     uint64_t indexOffset;
     uint64_t hashSalt;
     uint64_t compressionThreshold;
-
 };
 
 /**
@@ -151,28 +123,22 @@ class Metadata {
 class SSTable : public IFetchable {
 
   public:
-
-    FetchResult fetch(const std::string &key) override;
+    FetchResult fetch(const std::string& key) override;
 
     std::vector<IndexEntry> buildIndex();
 
     FetchResult getData(IndexEntry idx) const;
 
-    static std::unique_ptr<SSTable> createFromKeyMap(const Memtable &km,
-                                                     std::string fileName,
-                                                     uint64_t compressionThreshold=1024);
+    static std::unique_ptr<SSTable> createFromKeyMap(const Memtable& km, std::string fileName,
+                                                     uint64_t compressionThreshold = 1024);
 
-    static std::unique_ptr<SSTable> createFromFileName(const std::string &fileName);
+    static std::unique_ptr<SSTable> createFromFileName(const std::string& fileName);
 
     const Metadata metadata;
 
-
   private:
-
-    explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file,
-                     Metadata metadata)
-        : fileName(std::move(fileName)), file(std::move(file)),
-          metadata(metadata) {
+    explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file, Metadata metadata)
+        : fileName(std::move(fileName)), file(std::move(file)), metadata(metadata) {
         ;
     }
 
@@ -186,7 +152,7 @@ class SSTable : public IFetchable {
      * @param key
      * @return
      */
-    uint64_t hashKey(const std::string &key) const;
+    uint64_t hashKey(const std::string& key) const;
 
     /**
      * Fetch the ith index or none if this index does not exist.
@@ -200,10 +166,7 @@ class SSTable : public IFetchable {
      * @param idx
      * @return
      */
-    boost::optional<IndexEntry> getIndexByKey(const std::string &key) const;
-
-
-
+    boost::optional<IndexEntry> getIndexByKey(const std::string& key) const;
 };
 
 #endif // MILES_SSTABLE_H

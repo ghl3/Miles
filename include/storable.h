@@ -16,12 +16,12 @@ class IStorable {
     IStorable() = default;
     virtual ~IStorable() = default;
 
-    IStorable(IStorable const &) = delete;
-    void operator=(IStorable const &x) = delete;
+    IStorable(IStorable const&) = delete;
+    void operator=(IStorable const& x) = delete;
 
-    virtual StoreResult store(const std::string &key, std::vector<char> &&) = 0;
+    virtual StoreResult store(const std::string& key, std::vector<char>&&) = 0;
 
-    StoreResult storeJson(const std::string &key, const json &payload) {
+    StoreResult storeJson(const std::string& key, const json& payload) {
         return store(key, utils::jsonToCharVector(payload));
     }
 };

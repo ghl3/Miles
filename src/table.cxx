@@ -19,7 +19,7 @@ Table::~Table() {
     this->wal->clear();
 }
 
-StoreResult Table::store(const std::string &key, std::vector<char> &&payload) {
+StoreResult Table::store(const std::string& key, std::vector<char>&& payload) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
@@ -44,7 +44,7 @@ StoreResult Table::store(const std::string &key, std::vector<char> &&payload) {
     return this->inMemoryStorage->store(key, std::move(payload));
 }
 
-FetchResult Table::fetch(const std::string &key) {
+FetchResult Table::fetch(const std::string& key) {
 
     std::lock_guard<std::mutex> guard(this->lock);
 
@@ -55,8 +55,7 @@ FetchResult Table::fetch(const std::string &key) {
     } else {
 
         // Iterate in reverse order
-        for (auto rit = diskStorage.rbegin(); rit != diskStorage.rend();
-             ++rit) {
+        for (auto rit = diskStorage.rbegin(); rit != diskStorage.rend(); ++rit) {
             auto sstableResult = (*rit)->fetch(key);
             if (sstableResult.isSuccess) {
                 return sstableResult;
@@ -68,10 +67,9 @@ FetchResult Table::fetch(const std::string &key) {
 }
 
 bool Table::saveInMemoryToDisk() {
-    std::string fileName =
-        (std::stringstream() << directory << "/"
-                             << "table_" << this->diskStorage.size() << ".dat")
-            .str();
+    std::string fileName = (std::stringstream() << directory << "/"
+                                                << "table_" << this->diskStorage.size() << ".dat")
+                               .str();
     auto newSSTable = SSTable::createFromKeyMap(*inMemoryStorage, fileName);
     this->diskStorage.push_back(std::move(newSSTable));
     return true;
@@ -89,8 +87,7 @@ std::vector<std::string> Table::getDataFiles(std::string directory) {
 
         boost::match_results<std::string::const_iterator> what;
 
-        if (boost::regex_match(it->path().filename().string(), what,
-                               my_filter)) {
+        if (boost::regex_match(it->path().filename().string(), what, my_filter)) {
             ret.push_back(it->path().string());
         }
         ++it;
@@ -99,14 +96,13 @@ std::vector<std::string> Table::getDataFiles(std::string directory) {
     return ret;
 }
 
-std::unique_ptr<Table> Table::buildFromDirectory(std::string directory,
-                                                 size_t maxInMemorySize) {
+std::unique_ptr<Table> Table::buildFromDirectory(std::string directory, size_t maxInMemorySize) {
 
     auto ptr = std::make_unique<Table>(directory, maxInMemorySize);
 
     // TODO: Ensure data files are returned in the right order (they appear to
     // not be)
-    for (const auto &path : Table::getDataFiles(directory)) {
+    for (const auto& path : Table::getDataFiles(directory)) {
         ptr->diskStorage.push_back(SSTable::createFromFileName(path));
     }
 

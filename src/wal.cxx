@@ -14,7 +14,7 @@
 #include <iterator>
 #include <string>
 
-bool Wal::log(const std::string &key, const std::vector<char> &payload) {
+bool Wal::log(const std::string& key, const std::vector<char>& payload) {
     this->file.clear();
     this->file << key << std::endl;
     this->file.write(&(payload[0]), payload.size());
@@ -22,26 +22,22 @@ bool Wal::log(const std::string &key, const std::vector<char> &payload) {
     return true;
 }
 
-bool Wal::logJson(const std::string &key, const json &payload) {
+bool Wal::logJson(const std::string& key, const json& payload) {
     return Wal::log(key, utils::stringToCharVector(payload.dump()));
 }
 
 bool Wal::clear() {
-    auto tmp = std::fstream(path, std::fstream::in | std::fstream::out |
-                                      std::fstream::trunc);
-    file = std::fstream(path, std::fstream::in | std::fstream::out |
-                                  std::fstream::ate);
+    auto tmp = std::fstream(path, std::fstream::in | std::fstream::out | std::fstream::trunc);
+    file = std::fstream(path, std::fstream::in | std::fstream::out | std::fstream::ate);
     return true;
 }
 
-std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>>
-Wal::buildKeyMapAndWall(std::string walPath) {
+std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>> Wal::buildKeyMapAndWall(std::string walPath) {
 
     auto wal = std::make_unique<Wal>(walPath);
     auto keyMap = std::make_unique<Memtable>();
 
-    for (std::istream_iterator<std::string> it = wal->begin(); it != wal->end();
-         ++it) {
+    for (std::istream_iterator<std::string> it = wal->begin(); it != wal->end(); ++it) {
         auto key = *it;
         ++it;
         std::string val = *it;

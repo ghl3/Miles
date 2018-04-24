@@ -2,19 +2,14 @@
 // Created by George Lewis on 4/21/18.
 //
 
-
-#include <boost/functional/hash.hpp>
 #include "bloomfilter.h"
+#include <boost/functional/hash.hpp>
 
-
-BloomFilter::BloomFilter(size_t numBits, size_t numHashes) :
-        bitMap(numBits, false),
-        hashSeeds(numHashes) {
-    for (size_t i=0; i < numHashes; ++i) {
+BloomFilter::BloomFilter(size_t numBits, size_t numHashes) : bitMap(numBits, false), hashSeeds(numHashes) {
+    for (size_t i = 0; i < numHashes; ++i) {
         hashSeeds.at(i) = i;
     }
 }
-
 
 std::vector<bool> BloomFilter::getHashBits(const std::string& key) {
 
@@ -28,24 +23,22 @@ std::vector<bool> BloomFilter::getHashBits(const std::string& key) {
     return hashBits;
 }
 
-
 void BloomFilter::add(const std::string& key) {
 
     std::vector<bool> hashBits = getHashBits(key);
 
-    for (size_t i=0; i < bitMap.size(); ++i) {
+    for (size_t i = 0; i < bitMap.size(); ++i) {
         if (hashBits[i]) {
             bitMap.at(i) = true;
         }
     }
 }
 
-
 bool BloomFilter::containsKey(const std::string& key) {
 
     std::vector<bool> hashBits = getHashBits(key);
 
-    for (size_t i=0; i < bitMap.size(); ++i) {
+    for (size_t i = 0; i < bitMap.size(); ++i) {
         // If the bit is set for THIS key but not
         // in the bit map, then we KNOW FOR SURE
         // that this key has not been added.
@@ -60,9 +53,8 @@ bool BloomFilter::containsKey(const std::string& key) {
     return true;
 }
 
-
 void BloomFilter::clear() {
-    for (auto &&i : bitMap) {
+    for (auto&& i : bitMap) {
         i = false;
     }
 }
