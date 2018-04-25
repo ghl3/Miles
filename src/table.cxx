@@ -62,7 +62,7 @@ FetchResult Table::fetch(const std::string& key) {
             }
         }
 
-        return FetchResult::error();
+        return FetchResult::error(ResultType::KEY_NOT_FOUND);
     }
 }
 

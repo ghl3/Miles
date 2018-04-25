@@ -5,6 +5,8 @@
 #include "database.h"
 #include <sstream>
 
+#include "results.h"
+
 StoreResult Database::store(const std::string& table, const std::string& key, std::vector<char>&& payload) {
 
     if (this->tableMap.find(table) == tableMap.end()) {
@@ -19,7 +21,7 @@ StoreResult Database::store(const std::string& table, const std::string& key, st
 
 FetchResult Database::fetch(const std::string& table, const std::string& key) {
     if (this->tableMap.find(table) == this->tableMap.end()) {
-        return FetchResult::error();
+        return FetchResult::error(ResultType::TABLE_NOT_FOUND);
     } else {
         return (this->tableMap)[table]->fetch(key);
     }

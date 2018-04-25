@@ -10,6 +10,8 @@
 #include <sstable.h>
 #include <zip.h>
 
+#include "results.h"
+
 FetchResult SSTable::fetch(const std::string& key) {
 
     boost::optional<IndexEntry> idxOpt = getIndexByKey(key);
@@ -17,7 +19,7 @@ FetchResult SSTable::fetch(const std::string& key) {
     if (idxOpt.is_initialized()) {
         return this->getData(idxOpt.get());
     } else {
-        return FetchResult::error();
+        return FetchResult::error(ResultType::FOUND_IN_SSTABLE);
     }
 }
 
@@ -30,7 +32,7 @@ FetchResult SSTable::getData(IndexEntry idx) const {
         data = Zip::decompress(data);
     }
 
-    return FetchResult::success(utils::stringToCharVector(data));
+    return FetchResult::success(utils::stringToCharVector(data), ResultType::FOUND_IN_SSTABLE);
 }
 
 boost::optional<IndexEntry> SSTable::getIndexByIdx(uint64_t idx) const {

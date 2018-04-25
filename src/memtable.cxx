@@ -3,18 +3,17 @@
 //
 
 #include <memory>
-
 #include <memtable.h>
 #include <results.h>
 
 FetchResult Memtable::fetch(const std::string& key) {
     if (data.find(key) == data.end()) {
-        return FetchResult::error();
+        return FetchResult::error(ResultType::KEY_NOT_FOUND);
     } else {
         // This copies the data and returns it to the user
         // This is the semantics we want (it allows the fetcher
         // to own the data)
-        return FetchResult::success(std::vector<char>(data[key]));
+        return FetchResult::success(std::vector<char>(data[key]), ResultType::FOUND_IN_MEMTABLE);
     }
 }
 
