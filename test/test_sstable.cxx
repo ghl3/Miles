@@ -32,10 +32,6 @@ TEST(test_sstable, metadata) {
     EXPECT_EQ(1, metadata.getNumKeys());
     EXPECT_EQ(0, metadata.getHashSalt());
     EXPECT_LT(0, metadata.getIndexStart());
-
-    //EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
-    //EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getAsJson());
-    //EXPECT_EQ(false, ssTable->fetch("bar").isSuccess);
 }
 
 

@@ -11,6 +11,7 @@
 #include "sstable.h"
 #include "storable.h"
 #include "wal.h"
+#include "bloomfilter.h"
 
 // A Table is a storage engine that combines
 // on-disk SS-Tables and an in-memory key-val map
@@ -26,9 +27,11 @@ class Table : public IStorable, IFetchable {
 
   public:
     explicit Table(std::string directory, size_t maxInMemorySize)
-        : directory(std::move(directory)), maxInMemorySize(maxInMemorySize),
+        : directory(std::move(directory)),
+          maxInMemorySize(maxInMemorySize),
           inMemoryStorage(std::make_unique<Memtable>()),
-          wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str())) {
+          wal(std::make_unique<Wal>((std::stringstream() << this->directory << "/wal.log").str())),
+          bloomFilter(1000, 50) {
         ;
     }
 
@@ -54,6 +57,8 @@ class Table : public IStorable, IFetchable {
     std::vector<std::unique_ptr<SSTable>> diskStorage;
 
     std::unique_ptr<Wal> wal;
+
+    BloomFilter bloomFilter;
 
     std::mutex lock;
 };

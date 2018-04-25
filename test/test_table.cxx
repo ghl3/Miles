@@ -19,8 +19,7 @@ std::string fileToString(const std::string &fileName) {
 }
 
 
-TEST(table, store_and_fetch)
-{
+TEST(table, store_and_fetch) {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
@@ -38,8 +37,7 @@ TEST(table, store_and_fetch)
 }
 
 
-TEST(table, move_to_disk)
-{
+TEST(table, move_to_disk) {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
@@ -68,8 +66,7 @@ TEST(table, move_to_disk)
 }
 
 
-TEST(table, reload_from_file)
-{
+TEST(table, reload_from_file) {
 
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
 

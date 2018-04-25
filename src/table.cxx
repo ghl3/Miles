@@ -19,6 +19,23 @@ Table::~Table() {
     this->wal->clear();
 }
 
+
+/**
+ * Store the given payload to the table under the given key.
+ * Storing the key must have the following properties:
+ *
+ * - It is reliable to failures during storage (it never ends up in a bad
+ *   state, or can always be recovered back to a working state on startup)
+ * - When returning a successful result, the result must be saved in
+ *   a durable way (it cannot later be lost due to failures)
+ * - When returning a failure result, it cannot have been saved
+ * - Must be resiliant against concurrent reads and writes on the same data,
+ *   presenting consistent (linearizable) data to the user
+ *
+ * @param key String name of the key
+ * @param payload The bytes of data to store
+ * @return
+ */
 StoreResult Table::store(const std::string& key, std::vector<char>&& payload) {
 
     std::lock_guard<std::mutex> guard(this->lock);
@@ -106,7 +123,7 @@ std::unique_ptr<Table> Table::buildFromDirectory(std::string directory, size_t m
         ptr->diskStorage.push_back(SSTable::createFromFileName(path));
     }
 
-    auto keyMapAndWal = Wal::buildKeyMapAndWall(directory + "/wal.log");
+    auto keyMapAndWal = Wal::buildKeyMapAndWal(directory + "/wal.log");
 
     ptr->inMemoryStorage = std::move(keyMapAndWal.second);
     ptr->wal = std::move(keyMapAndWal.first);

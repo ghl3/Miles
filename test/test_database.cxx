@@ -12,8 +12,7 @@
 using json = nlohmann::json;
 
 
-TEST(storage_test, map_storage)
-{
+TEST(storage, map_storage) {
 
     utils::TempDirectory tmpDir("/tmp/miles/storage_test_");
 
