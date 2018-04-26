@@ -20,10 +20,13 @@ using json = nlohmann::json;
 class Database {
 
   public:
+
     explicit Database(std::string directory, size_t maxStorageSize)
         : maxStorageSize(maxStorageSize), directory(std::move(directory)) {
         ;
     }
+
+    Database(const Database&)=delete;
 
     StoreResult store(const std::string& table, const std::string& key, std::vector<char>&& payload);
 

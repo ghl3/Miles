@@ -28,7 +28,7 @@ FetchResult SSTable::getData(IndexEntry idx) const {
     std::string data(idx.getLength(), '\0');
     file->read(&data[0], static_cast<std::streamsize>(idx.getLength()));
 
-    if (idx.getCompressed()) {
+    if (idx.isCompressed()) {
         data = Zip::decompress(data);
     }
 
@@ -166,7 +166,8 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
         index.emplace_back(keyHash, currentOffset, sizeInBytes, compress);
         currentOffset += sizeInBytes;
 
-        file->write(&payload[0], sizeInBytes);
+        // TODO: Check paranthese
+        file->write(&(payload[0]), sizeInBytes);
     }
 
     std::sort(begin(index), end(index),

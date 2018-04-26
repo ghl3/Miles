@@ -28,6 +28,7 @@ std::vector<char> utils::stringToCharVector(const std::string& s) {
     return retval;
 }
 
+// TODO: Can avoid copies here
 std::string utils::charVectorToString(const std::vector<char>& data) {
     std::string result(data.begin(), data.end());
     return result;

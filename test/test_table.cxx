@@ -46,8 +46,10 @@ TEST(table, move_to_disk) {
 
     storage->storeJson("a", json::array({{"a", 10}, {"b", 20}}));
     storage->storeJson("b", json::array({{"a", 10}, {"b", 20}}));
+
     storage->storeJson("d", json::array({{"a", 10}, {"b", 20}}));
     storage->storeJson("c", json::array({{"a", 10}, {"b", 20}}));
+
     storage->storeJson("z", json::array({{"a", 10}, {"b", 20}}));
 
     EXPECT_EQ(false, storage->fetch("bar").isSuccess);
@@ -59,9 +61,15 @@ TEST(table, move_to_disk) {
     ASSERT_TRUE(boost::filesystem::exists(tmpDir.getPath() + "/table_1.dat"));
 
     // Assert that we created a WAL and its current contents are what we expect
-    std::string walFile = fileToString(tmpDir.getPath() + "/wal.log");
-    EXPECT_EQ(walFile, "z\n"
-                       "[[\"a\",10],[\"b\",20]]\n");
+    std::string walPath = tmpDir.getPath() + "/wal.log";
+    //std::string walFilePath = fileToString(tmpDir.getPath() + "/wal.log");
+
+    auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
+
+    // 'z' is the only key in the wal, as the rest are persisted to dsik
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("a"));
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("b"));
+    EXPECT_EQ(true, walAndKeyMap.second->containsKey("z"));
 
 }
 

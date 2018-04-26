@@ -63,7 +63,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/modules/googletest
 # Create the main executable
 #
 
-add_executable(miles src/miles.cxx ${SRC_FILES} include/bloomfilter.h src/bloomfilter.cxx include/hashing.h)
+add_executable(miles src/miles.cxx ${SRC_FILES} include/bloomfilter.h src/bloomfilter.cxx include/hashing.h include/constants.h)
 target_link_libraries(miles LINK_PUBLIC ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} glog::glog)
 
 

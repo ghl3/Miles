@@ -18,14 +18,25 @@
 
 class IndexEntry {
 
-  public:
-    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length, bool compressed = false)
-        : keyHash(keyHash), offset(offset), length(length), compressed(compressed ? 1 : 0) {
-        ;
-    }
+    const static uint8_t COMPRESSION_MASK = 1u << 0u;
+    const static uint8_t TOMBSTONE_MASK = 1u << 1u;
 
-    // TODO: Hide this constructor for better encapsulation
-    explicit IndexEntry() : keyHash(), offset(), length(), compressed(0) { ; }
+public:
+
+    explicit IndexEntry() : keyHash(), offset(), length(), metadata() { ; }
+
+    explicit IndexEntry(uint64_t keyHash,
+                        uint64_t offset,
+                        uint64_t length,
+                        bool isCompressed=false,
+                        bool isTombstone=false) : keyHash(keyHash), offset(offset), length(length), metadata(0) {
+        if (isCompressed) {
+            this->metadata = this->metadata | COMPRESSION_MASK;
+        }
+        if (isTombstone) {
+            this->metadata = this->metadata | TOMBSTONE_MASK;
+        }
+    }
 
     uint64_t getKeyHash() const { return this->keyHash; }
 
@@ -33,13 +44,12 @@ class IndexEntry {
 
     uint64_t getLength() const { return this->length; }
 
-    bool getCompressed() const { return this->compressed != 0; }
+    bool isCompressed() const { return (this->metadata & COMPRESSION_MASK) != 0; }
 
-    bool operator==(const IndexEntry& other) const {
-        return other.keyHash == this->keyHash && other.offset == this->offset && other.length == this->length;
-    }
+    bool isTombstone() const { return (this->metadata & TOMBSTONE_MASK) != 0; }
 
-  protected:
+
+protected:
     // Hash of the key
     uint64_t keyHash;
 
@@ -50,14 +60,15 @@ class IndexEntry {
     uint64_t length;
 
     // Is data compressed
-    uint64_t compressed;
+    uint8_t metadata;
 };
 
 class Metadata {
 
-  public:
+public:
+
     explicit Metadata(uint64_t numKeys, uint64_t indexOffset, uint64_t hashSalt, uint64_t compressionThreshold)
-        : numKeys(numKeys), indexOffset(indexOffset), hashSalt(hashSalt), compressionThreshold(compressionThreshold) {
+            : numKeys(numKeys), indexOffset(indexOffset), hashSalt(hashSalt), compressionThreshold(compressionThreshold) {
         ;
     }
 
@@ -77,7 +88,7 @@ class Metadata {
         return metadata;
     }
 
-  private:
+private:
     explicit Metadata() : numKeys(0), indexOffset(0), hashSalt(0), compressionThreshold(0) { ; }
 
     uint64_t numKeys;
@@ -97,7 +108,7 @@ class Metadata {
  * DATA
  * INDEX
  *
- * where the DATA section consists of gzipped JSON
+ * where the DATA section consists of possibly-gzipped payloads
  * payloads (stored as raw bytes) and the INDEX section
  * consists triplets:
  *
@@ -122,7 +133,10 @@ class Metadata {
  */
 class SSTable : public IFetchable {
 
-  public:
+public:
+
+    SSTable(const SSTable&)=delete;
+
     FetchResult fetch(const std::string& key) override;
 
     std::vector<IndexEntry> buildIndex();
@@ -138,9 +152,9 @@ class SSTable : public IFetchable {
 
     const Metadata metadata;
 
-  private:
+private:
     explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file, Metadata metadata)
-        : fileName(std::move(fileName)), metadata(metadata), file(std::move(file)) {
+            : fileName(std::move(fileName)), metadata(metadata), file(std::move(file)) {
         ;
     }
 

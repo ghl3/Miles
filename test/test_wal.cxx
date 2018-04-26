@@ -18,14 +18,14 @@ TEST(wal, write_read) {
     std::string walPath = tmpDir.getPath() + "/wal.log";
 
     // Create a WAL file and write data to it
-    auto wal = Wal(walPath);
+    Wal wal(walPath);
     wal.log("foo", "a=>1");
     wal.log("bar", "b=>2");
 
     // Convert the WAL file to an in-memory map
     // and ensure the data is consistent
     auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
-    auto keyMap = std::move(walAndKeyMap.second);
+    auto& keyMap = walAndKeyMap.second;
 
     EXPECT_EQ("a=>1", keyMap->fetch("foo").getAsString());
     EXPECT_EQ("b=>2", keyMap->fetch("bar").getAsString());
@@ -34,77 +34,50 @@ TEST(wal, write_read) {
 }
 
 
-TEST(wal, file_layout) {
-
-    utils::TempDirectory tmpDir("/tmp/miles/wal_test_");
-
-    std::string walPath = tmpDir.getPath() + "/wal.log";
-
-    // Create a WAL file and write data to it
-    auto wal = Wal(walPath);
-    wal.log("foo", "a=>1");
-    wal.log("bar", "b=>2");
-
-    std::string expectedWal = "foo\n"
-                              "a=>1\n"
-                              "bar\n"
-                              "b=>2\n"
-                              ;
-
-    {
-        std::ifstream walFile(walPath);
-        std::string walContents((std::istreambuf_iterator<char>(walFile)), std::istreambuf_iterator<char>());
-        EXPECT_EQ(expectedWal, walContents);
-    }
-
-    wal.clear();
-
-    {
-        std::ifstream walFile(walPath);
-        std::string walContents((std::istreambuf_iterator<char>(walFile)), std::istreambuf_iterator<char>());
-        EXPECT_EQ("", walContents);
-    }
-}
-
-
-
 TEST(wal, currupt_key) {
 
-    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_");
+
+    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_key_");
 
     std::string walPath = tmpDir.getPath() + "/wal.log";
 
-    std::ofstream out(walPath);
-    out << "k\n";
-    out << "v\n";
-    out << "bad";
+    // Encode the binary representation of 0(64b) 1(64b) 1(64b) 'k' 'v' (litle endian)
+    std::ofstream out(walPath, std::fstream::binary);
+    out.write("\0\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0kv", 26);
+
+    // Encode the binary representation of 0(64b) 1(64b) 1(64b) 'z' (litle endian)
+    // This is invalid because the key has only 1 character (and there is no value)
+    out.write("\0\0\0\0\0\0\0\0\2\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0z", 25);
+
     out.close();
 
     auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
 
     EXPECT_EQ(true, walAndKeyMap.second->containsKey("k"));
-    EXPECT_EQ(false, walAndKeyMap.second->containsKey("bad"));
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("z"));
 
 }
-
 
 
 TEST(wal, currupt_val) {
 
-    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_");
+    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_val_");
 
     std::string walPath = tmpDir.getPath() + "/wal.log";
 
-    std::ofstream out(walPath);
-    out << "k\n";
-    out << "v\n";
-    out << "k2\n";
-    out << "bad";
+    // Encode the binary representation of 0(64b) 1(64b) 1(64b) 'k' 'v' (litle endian)
+    std::ofstream out(walPath, std::fstream::binary);
+    out.write("\0\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0kv", 26);
+
+    // Encode the binary representation of 0(64b) 1(64b) 1(64b) 'z' (litle endian)
+    // This is invalid because it doesn't include a value (only 25 chars written)
+    out.write("\0\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0z", 25);
+
     out.close();
 
     auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
 
     EXPECT_EQ(true, walAndKeyMap.second->containsKey("k"));
-    EXPECT_EQ(false, walAndKeyMap.second->containsKey("bad"));
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("z"));
 
 }
