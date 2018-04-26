@@ -36,6 +36,9 @@ class Wal {
         return eof;
     }
 
+
+    std::fstream& getFile() { return file; }
+
   private:
     const std::string path;
 

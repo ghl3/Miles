@@ -27,10 +27,18 @@ Table::~Table() {
  * - It is reliable to failures during storage (it never ends up in a bad
  *   state, or can always be recovered back to a working state on startup)
  * - When returning a successful result, the result must be saved in
- *   a durable way (it cannot later be lost due to failures)
- * - When returning a failure result, it cannot have been saved
- * - Must be resiliant against concurrent reads and writes on the same data,
+ *   a durable way (it cannot later be lost due to failures) and all
+ *   future reads must see it.
+ * - When returning a failure result, it cannot have been saved and no future
+ *   reads should see it.
+ * - Must be resilient against concurrent reads and writes on the same data,
  *   presenting consistent (linearizable) data to the user
+ *
+ * Once a store is logged, it must be considered added.
+ * If the DB crashes between it being logged and added to the memtable/sstable,
+ * it'll be loaded into a memtable when the db is started up again.
+ * The DB is idempotent in regards to multiple stores, so if it is added to the
+ * log but the write fails, the user can safely retry.
  *
  * @param key String name of the key
  * @param payload The bytes of data to store

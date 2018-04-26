@@ -65,3 +65,46 @@ TEST(wal, file_layout) {
         EXPECT_EQ("", walContents);
     }
 }
+
+
+
+TEST(wal, currupt_key) {
+
+    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_");
+
+    std::string walPath = tmpDir.getPath() + "/wal.log";
+
+    std::ofstream out(walPath);
+    out << "k\n";
+    out << "v\n";
+    out << "bad";
+    out.close();
+
+    auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
+
+    EXPECT_EQ(true, walAndKeyMap.second->containsKey("k"));
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("bad"));
+
+}
+
+
+
+TEST(wal, currupt_val) {
+
+    utils::TempDirectory tmpDir("/tmp/miles/wal_currupt_");
+
+    std::string walPath = tmpDir.getPath() + "/wal.log";
+
+    std::ofstream out(walPath);
+    out << "k\n";
+    out << "v\n";
+    out << "k2\n";
+    out << "bad";
+    out.close();
+
+    auto walAndKeyMap = Wal::buildKeyMapAndWal(walPath);
+
+    EXPECT_EQ(true, walAndKeyMap.second->containsKey("k"));
+    EXPECT_EQ(false, walAndKeyMap.second->containsKey("bad"));
+
+}
