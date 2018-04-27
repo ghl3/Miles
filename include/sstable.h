@@ -18,8 +18,8 @@
 
 class IndexEntry {
 
-    const static uint8_t COMPRESSION_MASK = 1u << 0u;
-    const static uint8_t TOMBSTONE_MASK = 1u << 1u;
+    const static uint64_t COMPRESSION_MASK = 1u << 0u;
+    const static uint64_t TOMBSTONE_MASK = 1u << 1u;
 
 public:
 
@@ -60,7 +60,7 @@ protected:
     uint64_t length;
 
     // Is data compressed
-    uint8_t metadata;
+    uint64_t metadata;
 };
 
 class Metadata {
