@@ -19,7 +19,6 @@ Table::~Table() {
     this->wal->clear();
 }
 
-
 /**
  * Store the given payload to the table under the given key.
  * Storing the key must have the following properties:

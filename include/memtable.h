@@ -8,9 +8,9 @@
 #include "fetchable.h"
 #include "results.h"
 #include "storable.h"
+#include <set>
 #include <string>
 #include <unordered_map>
-#include <set>
 
 using json = nlohmann::json;
 

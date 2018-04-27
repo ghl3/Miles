@@ -9,13 +9,12 @@
 #include <fstream>
 #include <iostream>
 
+#include <constants.h>
 #include <fstream>
+#include <glog/logging.h>
 #include <iostream>
 #include <iterator>
 #include <string>
-#include <glog/logging.h>
-#include <constants.h>
-
 
 Wal::Wal(const std::string& path) : path(path) {
     // Use a temporary stream to ensure the
@@ -36,7 +35,6 @@ bool Wal::clear() {
     return true;
 }
 
-
 bool Wal::log(const std::string& key, const std::vector<char>& payload) {
 
     // Clear any error flags on the file
@@ -53,12 +51,11 @@ bool Wal::log(const std::string& key, const std::vector<char>& payload) {
 }
 
 bool Wal::log(const std::string& key, std::string&& payload) {
-// TODO: Optimize this
+    // TODO: Optimize this
     return Wal::log(key, utils::stringToCharVector(payload));
 }
 
-
-bool Wal::del(const std::string &key) {
+bool Wal::del(const std::string& key) {
 
     // Clear any error flags on the file
     // Note: This does NOT clear the contents of the file!
@@ -73,11 +70,7 @@ bool Wal::del(const std::string &key) {
     return true;
 }
 
-
-
-void Wal::seekToBeginnig() {
-    this->file.seekg(0);
-}
+void Wal::seekToBeginnig() { this->file.seekg(0); }
 
 boost::optional<LogEntry> Wal::getNextEntry() {
 
@@ -118,7 +111,6 @@ boost::optional<LogEntry> Wal::getNextEntry() {
 
     return LogEntry(header, std::move(key), std::move(payload));
 }
-
 
 Wal::KeyMapAndWal Wal::buildKeyMapAndWal(std::string walPath) {
 

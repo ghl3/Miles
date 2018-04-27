@@ -24,11 +24,9 @@ StoreResult Memtable::store(const std::string& key, std::vector<char>&& payload)
     return StoreResult(true);
 }
 
-
-void Memtable::del(const std::string &key) {
-this->data.erase(key);
-this->deletedKeys.insert(key);
-
+void Memtable::del(const std::string& key) {
+    this->data.erase(key);
+    this->deletedKeys.insert(key);
 }
 
 bool Memtable::containsKey(const std::string& key) const { return !(data.find(key) == data.end()); }

@@ -5,23 +5,21 @@
 #ifndef MILES_WAL_H
 #define MILES_WAL_H
 
+#include "constants.h"
 #include "memtable.h"
 #include "results.h"
-#include "constants.h"
+#include <boost/optional.hpp>
 #include <fstream>
 #include <ostream>
 #include <string>
-#include <boost/optional.hpp>
-
 
 class LogHeader {
 
-public:
-    LogHeader(uint64_t metadata, uint64_t keyLength, uint64_t payloadLength) :
-            metadata(metadata),
-            keyLength(keyLength),
-            payloadLength(payloadLength) {;}
-
+  public:
+    LogHeader(uint64_t metadata, uint64_t keyLength, uint64_t payloadLength)
+        : metadata(metadata), keyLength(keyLength), payloadLength(payloadLength) {
+        ;
+    }
 
     uint64_t getKeyLength() { return this->keyLength; }
     uint64_t getPayloadLength() { return this->payloadLength; }
@@ -29,8 +27,7 @@ public:
     void setDeleted() { metadata = metadata | constants::TOMBSTONE_MASK; }
     bool isDeleted() { return (metadata & constants::TOMBSTONE_MASK) != 0; }
 
-
-private:
+  private:
     constants::Metadata metadata;
 
     uint64_t keyLength;
@@ -38,31 +35,28 @@ private:
     uint64_t payloadLength;
 };
 
-
 class LogEntry {
 
-public:
-    LogEntry(LogHeader header, std::string&& key, std::vector<char>&& payload):
-            header(header),
-            key(std::move(key)),
-            payload(std::move(payload)),
-            isValid(true) {;}
+  public:
+    LogEntry(LogHeader header, std::string&& key, std::vector<char>&& payload)
+        : header(header), key(std::move(key)), payload(std::move(payload)), isValid(true) {
+        ;
+    }
 
-    LogEntry(LogEntry& rhs)=delete;
-    LogEntry(const LogEntry& rhs)=delete;
+    LogEntry(LogEntry& rhs) = delete;
+    LogEntry(const LogEntry& rhs) = delete;
 
-    LogEntry(LogEntry&& rhs) noexcept: header(rhs.header),
-                                       key(std::move(rhs.key)),
-                                       payload(std::move(rhs.payload)),
-                                       isValid(rhs.isValid) {;}
+    LogEntry(LogEntry&& rhs) noexcept
+        : header(rhs.header), key(std::move(rhs.key)), payload(std::move(rhs.payload)), isValid(rhs.isValid) {
+        ;
+    }
 
-    std::string&& moveKey() { return std::move(this->key);}
-    std::vector<char>&& movePayload() { return std::move(this->payload);}
+    std::string&& moveKey() { return std::move(this->key); }
+    std::vector<char>&& movePayload() { return std::move(this->payload); }
 
     bool isDelete() { return header.isDeleted(); }
 
-private:
-
+  private:
     LogHeader header;
 
     std::string key;
@@ -82,8 +76,7 @@ private:
 class Wal {
     using KeyMapAndWal = std::pair<std::unique_ptr<Wal>, std::unique_ptr<Memtable>>;
 
-public:
-
+  public:
     Wal(const Wal&) = delete;
 
     explicit Wal(const std::string& path);
@@ -97,7 +90,7 @@ public:
 
     static KeyMapAndWal buildKeyMapAndWal(std::string walPath);
 
-private:
+  private:
     const std::string path;
 
     std::fstream file;

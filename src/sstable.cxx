@@ -155,6 +155,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
         // TODO: Update salt and re-hash if there are any hash collisions
         uint64_t keyHash = hashing::hashKeyWithSalt(keyValPair.first, hashSalt);
 
+        // TODO: Avoid conversions to-and-from char vector here
         std::string payload = utils::charVectorToString(keyValPair.second);
 
         bool compress = (payload.size() > compressionThreshold);
@@ -166,7 +167,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
         index.emplace_back(keyHash, currentOffset, sizeInBytes, compress);
         currentOffset += sizeInBytes;
 
-        // TODO: Check paranthese
+        // TODO: Check parentheses
         file->write(&(payload[0]), sizeInBytes);
     }
 

@@ -13,23 +13,18 @@
 #include "memtable.h"
 #include "storable.h"
 
+#include "constants.h"
 #include "fetchable.h"
 #include "gsl.h"
-#include "constants.h"
 
 class IndexEntry {
 
-
-
-public:
-
+  public:
     explicit IndexEntry() : keyHash(), offset(), length(), metadata() { ; }
 
-    explicit IndexEntry(uint64_t keyHash,
-                        uint64_t offset,
-                        uint64_t length,
-                        bool isCompressed=false,
-                        bool isTombstone=false) : keyHash(keyHash), offset(offset), length(length), metadata(0) {
+    explicit IndexEntry(uint64_t keyHash, uint64_t offset, uint64_t length, bool isCompressed = false,
+                        bool isTombstone = false)
+        : keyHash(keyHash), offset(offset), length(length), metadata(0) {
         if (isCompressed) {
             this->metadata = metadata | constants::COMPRESSION_MASK;
         }
@@ -48,8 +43,7 @@ public:
 
     bool isTombstone() const { return (metadata & constants::TOMBSTONE_MASK) != 0; }
 
-
-protected:
+  protected:
     // Hash of the key
     uint64_t keyHash;
 
@@ -65,10 +59,9 @@ protected:
 
 class Metadata {
 
-public:
-
+  public:
     explicit Metadata(uint64_t numKeys, uint64_t indexOffset, uint64_t hashSalt, uint64_t compressionThreshold)
-            : numKeys(numKeys), indexOffset(indexOffset), hashSalt(hashSalt), compressionThreshold(compressionThreshold) {
+        : numKeys(numKeys), indexOffset(indexOffset), hashSalt(hashSalt), compressionThreshold(compressionThreshold) {
         ;
     }
 
@@ -88,7 +81,7 @@ public:
         return metadata;
     }
 
-private:
+  private:
     explicit Metadata() : numKeys(0), indexOffset(0), hashSalt(0), compressionThreshold(0) { ; }
 
     uint64_t numKeys;
@@ -133,9 +126,8 @@ private:
  */
 class SSTable : public IFetchable {
 
-public:
-
-    SSTable(const SSTable&)=delete;
+  public:
+    SSTable(const SSTable&) = delete;
 
     FetchResult fetch(const std::string& key) override;
 
@@ -152,9 +144,9 @@ public:
 
     const Metadata metadata;
 
-private:
+  private:
     explicit SSTable(std::string fileName, std::unique_ptr<std::fstream> file, Metadata metadata)
-            : fileName(std::move(fileName)), metadata(metadata), file(std::move(file)) {
+        : fileName(std::move(fileName)), metadata(metadata), file(std::move(file)) {
         ;
     }
 
