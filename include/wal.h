@@ -7,6 +7,7 @@
 
 #include "memtable.h"
 #include "results.h"
+#include "constants.h"
 #include <fstream>
 #include <ostream>
 #include <string>
@@ -16,13 +17,21 @@
 class LogHeader {
 
 public:
-    LogHeader(uint8_t metadata, uint64_t keyLength, uint64_t payloadLength) :
-    metadata(metadata),
-    keyLength(keyLength),
-    payloadLength(payloadLength) {;}
+    LogHeader(uint64_t metadata, uint64_t keyLength, uint64_t payloadLength) :
+            metadata(metadata),
+            keyLength(keyLength),
+            payloadLength(payloadLength) {;}
 
-    // TODO: can we mak this smaller?
-    uint64_t metadata;
+
+    uint64_t getKeyLength() { return this->keyLength; }
+    uint64_t getPayloadLength() { return this->payloadLength; }
+
+    void setDeleted() { metadata = metadata | constants::TOMBSTONE_MASK; }
+    bool isDeleted() { return (metadata & constants::TOMBSTONE_MASK) != 0; }
+
+
+private:
+    constants::Metadata metadata;
 
     uint64_t keyLength;
 
@@ -49,6 +58,8 @@ public:
 
     std::string&& moveKey() { return std::move(this->key);}
     std::vector<char>&& movePayload() { return std::move(this->payload);}
+
+    bool isDelete() { return header.isDeleted(); }
 
 private:
 
@@ -78,31 +89,13 @@ public:
     explicit Wal(const std::string& path);
     bool log(const std::string& key, const std::vector<char>& payload);
     bool log(const std::string& key, std::string&& payload);
-    //bool del(const std::string& key);
+    bool del(const std::string& key);
 
     bool clear();
     void seekToBeginnig();
     boost::optional<LogEntry> getNextEntry();
 
     static KeyMapAndWal buildKeyMapAndWal(std::string walPath);
-
-/*
-    // TODO: Make an iterator over lines in a WAL
-    std::istream_iterator<std::string> begin() {
-        // return begin(file);
-        file.seekg(0);
-        std::istream_iterator<std::string> in_iter(file);
-        return in_iter;
-    }
-
-    std::istream_iterator<std::string> end() {
-        std::istream_iterator<std::string> eof;
-        return eof;
-    }
-
-
-    std::fstream& getFile() { return file; }
-    */
 
 private:
     const std::string path;

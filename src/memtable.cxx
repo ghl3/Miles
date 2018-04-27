@@ -19,8 +19,16 @@ FetchResult Memtable::fetch(const std::string& key) {
 
 StoreResult Memtable::store(const std::string& key, std::vector<char>&& payload) {
     // The data member takes ownership of the underlying payload data
-    data.emplace(key, std::move(payload));
+    this->data.emplace(key, std::move(payload));
+    this->deletedKeys.erase(key);
     return StoreResult(true);
+}
+
+
+void Memtable::del(const std::string &key) {
+this->data.erase(key);
+this->deletedKeys.insert(key);
+
 }
 
 bool Memtable::containsKey(const std::string& key) const { return !(data.find(key) == data.end()); }

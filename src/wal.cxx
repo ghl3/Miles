@@ -54,13 +54,24 @@ bool Wal::log(const std::string& key, const std::vector<char>& payload) {
 
 bool Wal::log(const std::string& key, std::string&& payload) {
 // TODO: Optimize this
-  return Wal::log(key, utils::stringToCharVector(payload));
+    return Wal::log(key, utils::stringToCharVector(payload));
 }
 
 
-//bool Wal::del(const std::string &key) {
-//    return false;
-//}
+bool Wal::del(const std::string &key) {
+
+    // Clear any error flags on the file
+    // Note: This does NOT clear the contents of the file!
+    this->file.clear();
+
+    LogHeader header(0, key.size(), 0);
+    header.setDeleted();
+    this->file.write(reinterpret_cast<char*>(&header), sizeof(LogHeader));
+    this->file.write(&(key[0]), key.size() * sizeof(char));
+    this->file.flush();
+
+    return true;
+}
 
 
 
@@ -80,26 +91,26 @@ boost::optional<LogEntry> Wal::getNextEntry() {
         return boost::none;
     }
 
-    if (header.keyLength > constants::maxKeySize) {
+    if (header.getKeyLength() > constants::maxKeySize) {
         LOG(ERROR) << "Encountered bad key size. Discarding Entry." << std::endl;
         return boost::none;
     }
 
-    if (header.payloadLength > constants::maxPayloadSize) {
+    if (header.getPayloadLength() > constants::maxPayloadSize) {
         LOG(ERROR) << "Encountered bad payload size. Discarding Entry." << std::endl;
         return boost::none;
     }
 
     std::string key;
-    key.resize(header.keyLength);
-    this->file.read(&(key[0]), static_cast<std::streamsize>(header.keyLength));
+    key.resize(static_cast<unsigned long>(header.getKeyLength()));
+    this->file.read(&(key[0]), static_cast<std::streamsize>(header.getKeyLength()));
     if (this->file.eof()) {
         LOG(INFO) << "Encountered EOF when reading WAL key. Discarding Entry." << std::endl;
         return boost::none;
     }
 
-    std::vector<char> payload(header.payloadLength);
-    this->file.read(&(payload[0]), static_cast<std::streamsize>(header.payloadLength));
+    std::vector<char> payload(static_cast<unsigned long>(header.getPayloadLength()));
+    this->file.read(&(payload[0]), static_cast<std::streamsize>(header.getPayloadLength()));
     if (this->file.eof()) {
         LOG(INFO) << "Encountered EOF when reading WAL val. Discarding Entry." << std::endl;
         return boost::none;
@@ -107,6 +118,7 @@ boost::optional<LogEntry> Wal::getNextEntry() {
 
     return LogEntry(header, std::move(key), std::move(payload));
 }
+
 
 Wal::KeyMapAndWal Wal::buildKeyMapAndWal(std::string walPath) {
 
@@ -117,7 +129,15 @@ Wal::KeyMapAndWal Wal::buildKeyMapAndWal(std::string walPath) {
     while (true) {
         boost::optional<LogEntry> entry = wal->getNextEntry();
         if (entry.is_initialized()) {
-            keyMap->store(entry.get().moveKey(), entry.get().movePayload());
+
+            if (entry.get().isDelete()) {
+                keyMap->del(entry.get().moveKey());
+
+            } else {
+
+                keyMap->store(entry.get().moveKey(), entry.get().movePayload());
+            }
+
         } else {
             break;
         }

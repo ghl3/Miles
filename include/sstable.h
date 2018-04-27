@@ -15,11 +15,11 @@
 
 #include "fetchable.h"
 #include "gsl.h"
+#include "constants.h"
 
 class IndexEntry {
 
-    const static uint64_t COMPRESSION_MASK = 1u << 0u;
-    const static uint64_t TOMBSTONE_MASK = 1u << 1u;
+
 
 public:
 
@@ -31,10 +31,10 @@ public:
                         bool isCompressed=false,
                         bool isTombstone=false) : keyHash(keyHash), offset(offset), length(length), metadata(0) {
         if (isCompressed) {
-            this->metadata = this->metadata | COMPRESSION_MASK;
+            this->metadata = metadata | constants::COMPRESSION_MASK;
         }
         if (isTombstone) {
-            this->metadata = this->metadata | TOMBSTONE_MASK;
+            this->metadata = metadata | constants::TOMBSTONE_MASK;
         }
     }
 
@@ -44,9 +44,9 @@ public:
 
     uint64_t getLength() const { return this->length; }
 
-    bool isCompressed() const { return (this->metadata & COMPRESSION_MASK) != 0; }
+    bool isCompressed() const { return (metadata & constants::COMPRESSION_MASK) != 0; }
 
-    bool isTombstone() const { return (this->metadata & TOMBSTONE_MASK) != 0; }
+    bool isTombstone() const { return (metadata & constants::TOMBSTONE_MASK) != 0; }
 
 
 protected:
@@ -60,7 +60,7 @@ protected:
     uint64_t length;
 
     // Is data compressed
-    uint64_t metadata;
+    constants::Metadata metadata;
 };
 
 class Metadata {

@@ -10,6 +10,7 @@
 #include "storable.h"
 #include <string>
 #include <unordered_map>
+#include <set>
 
 using json = nlohmann::json;
 
@@ -22,6 +23,8 @@ class Memtable : public IStorable, IFetchable {
 
     StoreResult store(const std::string& key, std::vector<char>&& payload) override;
 
+    void del(const std::string& key);
+
     bool containsKey(const std::string& key) const;
 
     size_t size() const { return data.size(); };
@@ -31,6 +34,8 @@ class Memtable : public IStorable, IFetchable {
 
   private:
     std::map<std::string, std::vector<char>> data;
+
+    std::set<std::string> deletedKeys;
 };
 
 #endif // MILES_KEY_MAP_H

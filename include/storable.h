@@ -21,8 +21,12 @@ class IStorable {
 
     virtual StoreResult store(const std::string& key, std::vector<char>&&) = 0;
 
-    StoreResult storeJson(const std::string& key, const json& payload) {
+    virtual StoreResult storeJson(const std::string& key, const json& payload) final {
         return store(key, utils::jsonToCharVector(payload));
+    }
+
+    virtual StoreResult storeString(const std::string& key, const std::string& str) final {
+        return store(key, utils::stringToCharVector(str));
     }
 };
 
