@@ -195,7 +195,7 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
     }
 
     // Finally, write the metadata to the beginning of the file
-    auto metadata = Metadata(km.size(), currentOffset, hashSalt, compressionThreshold);
+    auto metadata = Metadata(km.size() + km.getDeletedKeys().size(), currentOffset, hashSalt, compressionThreshold);
     file->seekp(0);
     file->write(reinterpret_cast<char*>(&metadata), sizeof(Metadata));
     file->flush();

@@ -13,16 +13,14 @@
 using json = nlohmann::json;
 
 
-TEST(test_sstable, metadata) {
-    auto keyMap = std::make_unique<Memtable>();
+TEST(sstable, metadata) {
+    Memtable keyMap;
     auto payload = json::array({{"a", 10}, {"b", 20}});
-    keyMap->storeJson("foo", payload);
+    keyMap.storeJson("foo", payload);
 
-    utils::TempDirectory tmpDir("/tmp/miles/test_sstable_metadata");
-
+    utils::TempDirectory tmpDir("/tmp/miles/test/sstable_metadata_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
-
-    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+    auto ssTable = SSTable::createFromKeyMap(keyMap, fname);
 
     auto metadata = ssTable->metadata;
 
@@ -35,17 +33,17 @@ TEST(test_sstable, metadata) {
 }
 
 
-TEST(test_sstable, map_storage) {
-    auto keyMap = std::make_unique<Memtable>();
+TEST(sstable, map_storage) {
+
+    Memtable keyMap;
+
     auto payload = json::array({{"a", 10}, {"b", 20}});
-    auto storeResult = keyMap->storeJson("foo", payload);
+    auto storeResult = keyMap.storeJson("foo", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
-    utils::TempDirectory tmpDir("/tmp/miles/test_sstable_map_storage");
-
+    utils::TempDirectory tmpDir("/tmp/miles/test/sstable_map_storage_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
-
-    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+    auto ssTable = SSTable::createFromKeyMap(keyMap, fname);
 
     auto x = ssTable->fetch("foo");
 
@@ -55,20 +53,19 @@ TEST(test_sstable, map_storage) {
 }
 
 
-TEST(test_sstable, many_keys) {
-    auto keyMap = std::make_unique<Memtable>();
+TEST(sstable, many_keys) {
 
-    keyMap->storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
-    keyMap->storeJson("bar", json::array({{"a", 10}, {"b", 20},}));
-    keyMap->storeJson("baz", json::array({{"a", 10}, {"b", 20},}));
-    keyMap->storeJson("bat", json::array({{"a", 10}, {"b", 20},}));
-    keyMap->storeJson("zap", json::array({{"a", 10}, {"b", 20},}));
+    Memtable keyMap;
 
+    keyMap.storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
+    keyMap.storeJson("bar", json::array({{"a", 10}, {"b", 20},}));
+    keyMap.storeJson("baz", json::array({{"a", 10}, {"b", 20},}));
+    keyMap.storeJson("bat", json::array({{"a", 10}, {"b", 20},}));
+    keyMap.storeJson("zap", json::array({{"a", 10}, {"b", 20},}));
 
-    utils::TempDirectory tmpDir("/tmp/miles/test_sstable_many_keys");
+    utils::TempDirectory tmpDir("/tmp/miles/test/sstable_many_keys_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
-
-    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+    auto ssTable = SSTable::createFromKeyMap(keyMap, fname);
 
     EXPECT_EQ(true, ssTable->fetch("foo").isPresent);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getAsJson());
@@ -87,17 +84,17 @@ TEST(test_sstable, many_keys) {
  * and that the index is as we expect.
  * Further, test that the data stored also matches our expectations
  */
-TEST(test_sstable, index) {
-    auto keyMap = std::make_unique<Memtable>();
+TEST(sstable, index) {
 
-    keyMap->storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
+    Memtable keyMap;
 
-    keyMap->storeJson("bar", json::array({{"a", 10}, {"b", 20},}));
+    keyMap.storeJson("foo", json::array({{"a", 10}, {"b", 20},}));
 
-    utils::TempDirectory tmpDir("/tmp/miles/ss_table_compressed_test_");
+    keyMap.storeJson("bar", json::array({{"a", 10}, {"b", 20},}));
+
+    utils::TempDirectory tmpDir("/tmp/miles/test/sstable_index_");
     std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
-
-    auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
+    auto ssTable = SSTable::createFromKeyMap(keyMap, fname);
 
     auto idx = ssTable->buildIndex();
 
@@ -115,5 +112,24 @@ TEST(test_sstable, index) {
     auto json = ssTable->getData(idx.at(0)).getAsJson();
 
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}),  json);
+
+}
+
+
+TEST(sstable, del) {
+
+    Memtable keyMap;
+
+    keyMap.storeString("foo", "10");
+    keyMap.storeString("bar", "10");
+    keyMap.del("bar");
+
+    utils::TempDirectory tmpDir("/tmp/miles/test/sstable_del_");
+    std::string fname = (std::stringstream() << tmpDir.getPath() << "/" << "foobar" << ".dat").str();
+    auto ssTable = SSTable::createFromKeyMap(keyMap, fname);
+
+    EXPECT_EQ("10", ssTable->fetch("foo").getAsString());
+    EXPECT_EQ(false, ssTable->fetch("bar").isPresent);
+    EXPECT_EQ(ResultType::DELETED_IN_SSTABLE, ssTable->fetch("bar").resultType);
 
 }

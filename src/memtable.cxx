@@ -28,6 +28,10 @@ StoreResult Memtable::store(const std::string& key, std::vector<char>&& payload)
 }
 
 void Memtable::del(const std::string& key) {
+    // If the key is not present, erasing is a no-op
+    // However, we still need to store the deletion in the
+    // deletedKeys set to avoid a fallback search for
+    // they key in the SSTable
     this->data.erase(key);
     this->deletedKeys.insert(key);
 }

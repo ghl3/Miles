@@ -30,11 +30,13 @@ class FetchResult {
 
   public:
     FetchResult(FetchResult&& that) noexcept
-        : isPresent(that.isPresent), payload(std::move(that.payload)), resultType(that.resultType) {
+        : isPresent(that.isPresent), resultType(that.resultType), payload(std::move(that.payload)) {
         ;
     }
 
     const bool isPresent;
+
+    const ResultType resultType;
 
     const std::vector<char> getPayload() { return payload; }
 
@@ -49,14 +51,14 @@ class FetchResult {
     static FetchResult absent(ResultType source) { return FetchResult(false, std::vector<char>(), source); }
 
   private:
+
     explicit FetchResult(bool s, std::vector<char>&& p, ResultType resultType)
-        : isPresent(s), payload(std::move(p)), resultType(resultType) {
+        : isPresent(s),resultType(resultType), payload(std::move(p)) {
         ;
     }
 
     std::vector<char> payload;
 
-    const ResultType resultType;
 };
 
 #endif // MILES_RESULTS_H
