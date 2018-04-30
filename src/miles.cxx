@@ -66,7 +66,7 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& s
     return app;
 }
 
-int main(int argc, char** argv) {
+int main(int, char** argv) {
 
     // Initialize logging
     google::InitGoogleLogging(argv[0]);
