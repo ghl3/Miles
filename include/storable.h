@@ -28,6 +28,8 @@ class IStorable {
     virtual StoreResult storeString(const std::string& key, const std::string& str) final {
         return store(key, utils::stringToCharVector(str));
     }
+
+    virtual void del(const std::string& key) = 0;
 };
 
 #endif // MILES_KEY_STORAGE_H

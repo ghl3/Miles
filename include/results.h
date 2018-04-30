@@ -38,6 +38,10 @@ class FetchResult {
 
     const ResultType resultType;
 
+    bool isDeleted() const {
+        return resultType == ResultType::DELETED_IN_MEMTABLE || resultType == ResultType::DELETED_IN_SSTABLE;
+    }
+
     const std::vector<char> getPayload() { return payload; }
 
     const std::string getAsString() { return utils::charVectorToString(this->payload); }
@@ -51,14 +55,12 @@ class FetchResult {
     static FetchResult absent(ResultType source) { return FetchResult(false, std::vector<char>(), source); }
 
   private:
-
     explicit FetchResult(bool s, std::vector<char>&& p, ResultType resultType)
-        : isPresent(s),resultType(resultType), payload(std::move(p)) {
+        : isPresent(s), resultType(resultType), payload(std::move(p)) {
         ;
     }
 
     std::vector<char> payload;
-
 };
 
 #endif // MILES_RESULTS_H

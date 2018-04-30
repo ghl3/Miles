@@ -21,7 +21,7 @@ std::string fileToString(const std::string &fileName) {
 
 TEST(table, store_and_fetch) {
 
-    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
+    utils::TempDirectory tmpDir("/tmp/miles/test/table_store_and_fetch_");
 
     auto storage = std::make_unique<Table>(tmpDir.getPath(), 10);
     EXPECT_EQ(false, storage->fetch("bar").isPresent);
@@ -37,9 +37,32 @@ TEST(table, store_and_fetch) {
 }
 
 
+TEST(table, del) {
+
+    utils::TempDirectory tmpDir("/tmp/miles/test/table_del_");
+
+    Table table(tmpDir.getPath(), 2);
+
+    table.storeString("foo", "10");
+    EXPECT_EQ("10", table.fetch("foo").getAsString());
+
+    // First, delete it and check that it was marked as deleted in the memtable
+    table.del("foo");
+    EXPECT_EQ(ResultType::DELETED_IN_MEMTABLE, table.fetch("foo").resultType);
+
+    // Next, add more keys so that the memtable is moved to SSTable storage
+    // and then check that we get the deletion from the SSTable
+    table.storeString("bar", "20");
+    table.storeString("baz", "30");
+    //table.storeString("biff", "40");
+    EXPECT_EQ(ResultType::DELETED_IN_SSTABLE, table.fetch("foo").resultType);
+
+}
+
+
 TEST(table, move_to_disk) {
 
-    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
+    utils::TempDirectory tmpDir("/tmp/miles/test/table_move_to_disk_");
 
     auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
     EXPECT_EQ(false, storage->fetch("bar").isPresent);
@@ -76,7 +99,7 @@ TEST(table, move_to_disk) {
 
 TEST(table, reload_from_file) {
 
-    utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_reload_from_file_");
+    utils::TempDirectory tmpDir("/tmp/miles/test/table_reload_from_file_");
 
     {
         auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);

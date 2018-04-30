@@ -56,7 +56,7 @@ StoreResult Table::store(const std::string& key, std::vector<char>&& payload) {
 
     // If the in-memory storage is at the max size,
     // move it to disk and create a fresh in-memory storage
-    if (this->inMemoryStorage->size() >= this->maxInMemorySize) {
+    if (this->inMemoryStorage->numKeysPresentOrDeleted() >= this->maxInMemorySize) {
         LOG(INFO) << "Moving in-memory map to new SSTable" << std::endl;
         this->saveInMemoryToDisk();
         this->wal->clear();
@@ -74,20 +74,30 @@ FetchResult Table::fetch(const std::string& key) {
 
     // First, check the in-memory storage
     auto inMemoryResult = this->inMemoryStorage->fetch(key);
-    if (inMemoryResult.isPresent) {
+    if (inMemoryResult.isPresent || inMemoryResult.isDeleted()) {
         return inMemoryResult;
     } else {
 
         // Iterate in reverse order
         for (auto rit = diskStorage.rbegin(); rit != diskStorage.rend(); ++rit) {
             auto sstableResult = (*rit)->fetch(key);
-            if (sstableResult.isPresent) {
+            if (sstableResult.isPresent || sstableResult.isDeleted()) {
                 return sstableResult;
             }
         }
 
         return FetchResult::absent(ResultType::NOT_FOUND);
     }
+}
+
+void Table::del(const std::string& key) {
+    // To speed up deletion, we allow deleting of keys
+    // that are already deleted.
+    // We could have done a search to determine if a key
+    // was never inserted or is currently deleted, but
+    // we avoid that since deletion is logically idempotent
+    // (This comes at the cost of slightly higher memory)
+    this->inMemoryStorage->del(key);
 }
 
 bool Table::saveInMemoryToDisk() {

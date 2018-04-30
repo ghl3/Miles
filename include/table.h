@@ -36,9 +36,14 @@ class Table : public IStorable, IFetchable {
 
     ~Table() override;
 
+    Table(const Table&) = delete;
+    Table& operator=(const Table&) = delete;
+
     FetchResult fetch(const std::string& key) override;
 
     StoreResult store(const std::string& key, std::vector<char>&& payload) override;
+
+    void del(const std::string& key) override;
 
     static std::vector<std::string> getDataFiles(std::string directory);
 

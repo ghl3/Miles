@@ -25,6 +25,7 @@ class Database {
     }
 
     Database(const Database&) = delete;
+    Database& operator=(const Database&) = delete;
 
     StoreResult store(const std::string& table, const std::string& key, std::vector<char>&& payload);
 

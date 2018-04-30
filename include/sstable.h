@@ -128,6 +128,7 @@ class SSTable : public IFetchable {
 
   public:
     SSTable(const SSTable&) = delete;
+    SSTable& operator=(const SSTable&) = delete;
 
     FetchResult fetch(const std::string& key) override;
 
