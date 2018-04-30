@@ -24,15 +24,15 @@ TEST(table, store_and_fetch) {
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
     auto storage = std::make_unique<Table>(tmpDir.getPath(), 10);
-    EXPECT_EQ(false, storage->fetch("bar").isSuccess);
+    EXPECT_EQ(false, storage->fetch("bar").isPresent);
 
     auto payload = json::array({{"a", 10}, {"b", 20}});
     auto storeResult = storage->storeJson("foo", payload);
     EXPECT_EQ(true, storeResult.isSuccess);
 
-    EXPECT_EQ(true, storage->fetch("foo").isSuccess);
+    EXPECT_EQ(true, storage->fetch("foo").isPresent);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), storage->fetch("foo").getAsJson());
-    EXPECT_EQ(false, storage->fetch("bar").isSuccess);
+    EXPECT_EQ(false, storage->fetch("bar").isPresent);
 
 }
 
@@ -42,7 +42,7 @@ TEST(table, move_to_disk) {
     utils::TempDirectory tmpDir("/tmp/miles/hybrid_key_storage_test_");
 
     auto storage = std::make_unique<Table>(tmpDir.getPath(), 2);
-    EXPECT_EQ(false, storage->fetch("bar").isSuccess);
+    EXPECT_EQ(false, storage->fetch("bar").isPresent);
 
     storage->storeJson("a", json::array({{"a", 10}, {"b", 20}}));
     storage->storeJson("b", json::array({{"a", 10}, {"b", 20}}));
@@ -52,9 +52,9 @@ TEST(table, move_to_disk) {
 
     storage->storeJson("z", json::array({{"a", 10}, {"b", 20}}));
 
-    EXPECT_EQ(false, storage->fetch("bar").isSuccess);
-    EXPECT_EQ(true, storage->fetch("a").isSuccess);
-    EXPECT_EQ(true, storage->fetch("z").isSuccess);
+    EXPECT_EQ(false, storage->fetch("bar").isPresent);
+    EXPECT_EQ(true, storage->fetch("a").isPresent);
+    EXPECT_EQ(true, storage->fetch("z").isPresent);
 
     // Assert that we created 2 on-disk sstable files
     ASSERT_TRUE(boost::filesystem::exists(tmpDir.getPath() + "/table_0.dat"));

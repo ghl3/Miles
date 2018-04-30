@@ -14,12 +14,20 @@
 
 FetchResult SSTable::fetch(const std::string& key) {
 
-    boost::optional<IndexEntry> idxOpt = getIndexByKey(key);
+    boost::optional<IndexEntry> idxOpt = this->getIndexByKey(key);
 
     if (idxOpt.is_initialized()) {
-        return this->getData(idxOpt.get());
+        const IndexEntry& idx = idxOpt.get();
+
+        // If it's marked as deleted in the index, return
+        if (idx.isTombstone()) {
+            return FetchResult::absent(ResultType::DELETED_IN_SSTABLE);
+        } else {
+            return this->getData(idx);
+        }
+
     } else {
-        return FetchResult::error(ResultType::FOUND_IN_SSTABLE);
+        return FetchResult::absent(ResultType::FOUND_IN_SSTABLE);
     }
 }
 
@@ -32,7 +40,7 @@ FetchResult SSTable::getData(IndexEntry idx) const {
         data = Zip::decompress(data);
     }
 
-    return FetchResult::success(utils::stringToCharVector(data), ResultType::FOUND_IN_SSTABLE);
+    return FetchResult::present(utils::stringToCharVector(data), ResultType::FOUND_IN_SSTABLE);
 }
 
 boost::optional<IndexEntry> SSTable::getIndexByIdx(uint64_t idx) const {
@@ -139,28 +147,29 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
     // Start at the beginning of the file
     file->seekp(0);
 
-    // Leave a blank space for the metadata
+    // Leave a blank space for the file metadata
     // by skipping ahead the memory size
     file->seekp(sizeof(Metadata), file->beg);
 
     // Then, write each value to the file and maintain an index
-    // for each entry
+    // for each entry (the index will be later written to the file
+    // after all payloads are written)
     uint64_t currentOffset = sizeof(Metadata);
     std::vector<IndexEntry> index;
 
-    uint64_t hashSalt = 0;
+    uint64_t hashSalt = SSTable::generateHashSalt(km);
 
     for (auto keyValPair : km) {
 
-        // TODO: Update salt and re-hash if there are any hash collisions
         uint64_t keyHash = hashing::hashKeyWithSalt(keyValPair.first, hashSalt);
 
         // TODO: Avoid conversions to-and-from char vector here
-        std::string payload = utils::charVectorToString(keyValPair.second);
+        std::vector<char> payload = keyValPair.second; // utils::charVectorToString(keyValPair.second);
 
         bool compress = (payload.size() > compressionThreshold);
         if (compress) {
-            payload = Zip::compress(payload);
+            // TODO: Can we avoid string conversions to optimize this process?
+            payload = utils::stringToCharVector(Zip::compress(utils::charVectorToString(payload)));
         }
 
         size_t sizeInBytes = payload.size() * sizeof(char);
@@ -171,14 +180,19 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
         file->write(&(payload[0]), sizeInBytes);
     }
 
+    for (auto& key : km.getDeletedKeys()) {
+        uint64_t keyHash = hashing::hashKeyWithSalt(key, hashSalt);
+        size_t sizeInBytes = 0;
+        index.emplace_back(keyHash, currentOffset, sizeInBytes, false, true);
+        currentOffset += sizeInBytes;
+    }
+
     std::sort(begin(index), end(index),
               [](const auto& lhs, const auto& rhs) { return lhs.getKeyHash() < rhs.getKeyHash(); });
 
     for (auto idx : index) {
         file->write(reinterpret_cast<char*>(&idx), sizeof(IndexEntry));
     }
-
-    *file << std::endl;
 
     // Finally, write the metadata to the beginning of the file
     auto metadata = Metadata(km.size(), currentOffset, hashSalt, compressionThreshold);
@@ -187,4 +201,9 @@ std::unique_ptr<SSTable> SSTable::createFromKeyMap(const Memtable& km, std::stri
     file->flush();
 
     return std::unique_ptr<SSTable>{new SSTable(fileName, std::move(file), metadata)};
+}
+
+uint64_t SSTable::generateHashSalt(const Memtable&) {
+    // TODO: Implement this to generate a salt that uniquely identifies keys
+    return 0;
 }

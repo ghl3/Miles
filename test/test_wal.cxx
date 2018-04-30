@@ -29,7 +29,7 @@ TEST(wal, write_read) {
 
     EXPECT_EQ("a=>1", keyMap->fetch("foo").getAsString());
     EXPECT_EQ("b=>2", keyMap->fetch("bar").getAsString());
-    EXPECT_EQ(false, keyMap->fetch("baz").isSuccess);
+    EXPECT_EQ(false, keyMap->fetch("baz").isPresent);
 
 }
 
@@ -53,8 +53,8 @@ TEST(wal, del) {
     auto& keyMap = walAndKeyMap.second;
 
     EXPECT_EQ("a=>1", keyMap->fetch("foo").getAsString());
-    EXPECT_EQ(false, keyMap->fetch("bar").isSuccess);
-    EXPECT_EQ(false, keyMap->fetch("baz").isSuccess);
+    EXPECT_EQ(false, keyMap->fetch("bar").isPresent);
+    EXPECT_EQ(false, keyMap->fetch("baz").isPresent);
 
 }
 

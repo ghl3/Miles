@@ -49,9 +49,9 @@ TEST(test_sstable, map_storage) {
 
     auto x = ssTable->fetch("foo");
 
-    EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("foo").isPresent);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getAsJson());
-    EXPECT_EQ(false, ssTable->fetch("bar").isSuccess);
+    EXPECT_EQ(false, ssTable->fetch("bar").isPresent);
 }
 
 
@@ -70,14 +70,14 @@ TEST(test_sstable, many_keys) {
 
     auto ssTable = SSTable::createFromKeyMap(*keyMap, fname);
 
-    EXPECT_EQ(true, ssTable->fetch("foo").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("foo").isPresent);
     EXPECT_EQ(json::array({{"a", 10}, {"b", 20}}), ssTable->fetch("foo").getAsJson());
-    EXPECT_EQ(true, ssTable->fetch("bar").isSuccess);
-    EXPECT_EQ(true, ssTable->fetch("baz").isSuccess);
-    EXPECT_EQ(true, ssTable->fetch("bat").isSuccess);
-    EXPECT_EQ(true, ssTable->fetch("zap").isSuccess);
+    EXPECT_EQ(true, ssTable->fetch("bar").isPresent);
+    EXPECT_EQ(true, ssTable->fetch("baz").isPresent);
+    EXPECT_EQ(true, ssTable->fetch("bat").isPresent);
+    EXPECT_EQ(true, ssTable->fetch("zap").isPresent);
 
-    EXPECT_EQ(false, ssTable->fetch("fish").isSuccess);
+    EXPECT_EQ(false, ssTable->fetch("fish").isPresent);
 
 }
 

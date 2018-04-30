@@ -11,12 +11,12 @@
 using json = nlohmann::json;
 
 enum class ResultType {
+    INVALID_TABLE,
     FOUND_IN_MEMTABLE,
-    // NOT_IN_BLOOMFILTER,
     FOUND_IN_SSTABLE,
-    // NOT_IN_SSTABLE,
-    TABLE_NOT_FOUND,
-    KEY_NOT_FOUND,
+    DELETED_IN_MEMTABLE,
+    DELETED_IN_SSTABLE,
+    NOT_FOUND
 };
 
 class StoreResult {
@@ -30,31 +30,27 @@ class FetchResult {
 
   public:
     FetchResult(FetchResult&& that) noexcept
-        : isSuccess(that.isSuccess), payload(std::move(that.payload)), resultType(that.resultType) {
+        : isPresent(that.isPresent), payload(std::move(that.payload)), resultType(that.resultType) {
         ;
     }
 
-    const bool isSuccess;
+    const bool isPresent;
 
     const std::vector<char> getPayload() { return payload; }
 
-    const std::string getAsString() {
-        return utils::charVectorToString(this->payload);
-        std::string result(this->payload.begin(), this->payload.end());
-        return result;
-    }
+    const std::string getAsString() { return utils::charVectorToString(this->payload); }
 
     const json getAsJson() { return json::parse(getAsString()); }
 
-    static FetchResult success(std::vector<char>&& p, ResultType resultType) {
+    static FetchResult present(std::vector<char>&& p, ResultType resultType) {
         return FetchResult(true, std::move(p), resultType);
     }
 
-    static FetchResult error(ResultType source) { return FetchResult(false, std::vector<char>(), source); }
+    static FetchResult absent(ResultType source) { return FetchResult(false, std::vector<char>(), source); }
 
   private:
     explicit FetchResult(bool s, std::vector<char>&& p, ResultType resultType)
-        : isSuccess(s), payload(std::move(p)), resultType(resultType) {
+        : isPresent(s), payload(std::move(p)), resultType(resultType) {
         ;
     }
 

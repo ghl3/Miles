@@ -173,6 +173,8 @@ class SSTable : public IFetchable {
      * @return
      */
     boost::optional<IndexEntry> getIndexByKey(const std::string& key) const;
+
+    static uint64_t generateHashSalt(const Memtable&);
 };
 
 #endif // MILES_SSTABLE_H

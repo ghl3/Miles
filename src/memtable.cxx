@@ -7,13 +7,16 @@
 #include <results.h>
 
 FetchResult Memtable::fetch(const std::string& key) {
-    if (data.find(key) == data.end()) {
-        return FetchResult::error(ResultType::KEY_NOT_FOUND);
+
+    if (this->deletedKeys.find(key) != this->deletedKeys.end()) {
+        return FetchResult::absent(ResultType::DELETED_IN_MEMTABLE);
+    } else if (data.find(key) == data.end()) {
+        return FetchResult::absent(ResultType::NOT_FOUND);
     } else {
         // This copies the data and returns it to the user
         // This is the semantics we want (it allows the fetcher
         // to own the data)
-        return FetchResult::success(std::vector<char>(data[key]), ResultType::FOUND_IN_MEMTABLE);
+        return FetchResult::present(std::vector<char>(data[key]), ResultType::FOUND_IN_MEMTABLE);
     }
 }
 

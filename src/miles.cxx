@@ -32,9 +32,9 @@ std::unique_ptr<crow::SimpleApp> createServer(const std::shared_ptr<Database>& s
     app->route_dynamic("/fetch/<str>/<str>")([=](const std::string table, const std::string key) {
         auto fetchResult = storage->fetch(table, key);
 
-        LOG(INFO) << "Fetch result: " << fetchResult.isSuccess << std::endl;
+        LOG(INFO) << "Fetch result: " << fetchResult.isPresent << std::endl;
 
-        if (fetchResult.isSuccess) {
+        if (fetchResult.isPresent) {
             return crow::response(200, fetchResult.getAsString());
         } else {
             return crow::response(404);

@@ -21,7 +21,7 @@ StoreResult Database::store(const std::string& table, const std::string& key, st
 
 FetchResult Database::fetch(const std::string& table, const std::string& key) {
     if (this->tableMap.find(table) == this->tableMap.end()) {
-        return FetchResult::error(ResultType::TABLE_NOT_FOUND);
+        return FetchResult::absent(ResultType::INVALID_TABLE);
     } else {
         return (this->tableMap)[table]->fetch(key);
     }

@@ -74,19 +74,19 @@ FetchResult Table::fetch(const std::string& key) {
 
     // First, check the in-memory storage
     auto inMemoryResult = this->inMemoryStorage->fetch(key);
-    if (inMemoryResult.isSuccess) {
+    if (inMemoryResult.isPresent) {
         return inMemoryResult;
     } else {
 
         // Iterate in reverse order
         for (auto rit = diskStorage.rbegin(); rit != diskStorage.rend(); ++rit) {
             auto sstableResult = (*rit)->fetch(key);
-            if (sstableResult.isSuccess) {
+            if (sstableResult.isPresent) {
                 return sstableResult;
             }
         }
 
-        return FetchResult::error(ResultType::KEY_NOT_FOUND);
+        return FetchResult::absent(ResultType::NOT_FOUND);
     }
 }
 

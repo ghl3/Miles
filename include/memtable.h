@@ -32,6 +32,8 @@ class Memtable : public IStorable, IFetchable {
     std::map<std::string, std::vector<char>>::const_iterator begin() const { return data.cbegin(); }
     std::map<std::string, std::vector<char>>::const_iterator end() const { return data.cend(); }
 
+    const std::set<std::string>& getDeletedKeys() const { return deletedKeys; }
+
   private:
     std::map<std::string, std::vector<char>> data;
 
